@@ -7,7 +7,7 @@ import { getColorAndText } from '../../../utils/log';
 const divRef = ref<HTMLDivElement | null>(null);
 const logStore = useLogStore();
 const mouseScrollHeight = ref(0);
-const timer = ref<number>();
+const timer = ref<NodeJS.Timeout>();
 
 const scrollToBottom = () => {
   if (divRef.value && logStore.isScrollToBottom) {

@@ -13,12 +13,14 @@ if (require("electron-squirrel-startup")) {
 const createWindow = () => {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 800,
+    width: 1000,
     height: 600,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
     },
+    icon: path.join(__dirname, '/assets/logo.png')
   });
+
 
   // and load the index.html of the app.
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
@@ -30,8 +32,8 @@ const createWindow = () => {
   }
 
   // // Open the DevTools.
-  // mainWindow.webContents.openDevTools();
-
+  mainWindow.webContents.openDevTools();
+  mainWindow.setMenu(null)
   let id = 0;
   expressApp.post("/send", function (req, res) {
     const msg = { id: id++, ...req.body };

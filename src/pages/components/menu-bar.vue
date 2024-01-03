@@ -37,16 +37,14 @@ const onSwapFunc = (path: string) => {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 70px;
   border-right: 2px solid rgba(51, 102, 102, 0.1);
   padding: 5px;
-  padding-top: 10px;
-  gap: 10px;
+  gap: 5px;
 }
 
 .icon {
-  width: 35px;
-  height: 35px;
+  width: 25px;
+  height: 25px;
   transform: translate(-100px);
   filter: drop-shadow(100px 0 0 #336666);
 }

@@ -14,16 +14,17 @@
   flex-direction: row;
   align-items: center;
   border-bottom: 2px solid #3366661a;
-  height: 50px;
+  height: 40px;
+  -webkit-app-region: drag;
 }
 
 .logo {
-  height: 35px;
-  margin-left: 15px;
+  height: 25px;
+  margin-left: 10px;
 }
 
 .title {
-  font-size: 20px;
+  font-size: 18px;
   margin: 0 auto;
   font-weight: bold;
   color: #555;

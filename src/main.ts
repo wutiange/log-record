@@ -13,11 +13,18 @@ if (require("electron-squirrel-startup")) {
 const createWindow = () => {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 1000,
+    width: 1200,
     height: 600,
+    titleBarStyle: 'hidden',
+    titleBarOverlay: {
+      color: '#fff',
+      symbolColor: '#336666',
+      height: 38
+    },
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
     },
+    transparent: true,
     icon: path.join(__dirname, '/assets/logo.png')
   });
 

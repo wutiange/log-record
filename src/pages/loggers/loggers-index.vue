@@ -60,6 +60,7 @@ watch(() => logStore.currentItem, showDrawer);
   display: flex;
   flex-direction: column;
   flex: 1;
+  width: 0;
 }
 
 .related-operation {

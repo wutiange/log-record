@@ -73,12 +73,10 @@ const wheel = (event: WheelEvent) => {
           class="list-item"
           :class="logStore.currentItem?.id === item.id && 'select-back'"
         >
-          <a-tag :color="getColorAndText(item.level).color">{{
-            getColorAndText(item.level).text
-          }}</a-tag>
+          <div :class="`log-level-sign ${item.level}`" />
           <a-tag color="default">{{ getHMS(item.createTime) }}</a-tag>
           <span class="header-text" v-html="item.text" />
-          <arrow-right-outlined />
+          <arrow-right-outlined class="right-outlined" />
         </a-list-item>
       </template>
     </a-list>
@@ -90,7 +88,6 @@ const wheel = (event: WheelEvent) => {
   overflow-y: scroll;
   flex: 1;
   margin-bottom: 20px;
-  /* height: 200px; */
 }
 
 .log-container::-webkit-scrollbar {
@@ -106,11 +103,29 @@ const wheel = (event: WheelEvent) => {
   background-color: #3366661a;
 }
 
+.log-level-sign {
+  height: 22px;
+  width: 2px;
+  margin-right: 5px;
+  flex-shrink: 0;
+}
+
+.log {
+  background-color: #1677ff;
+}
+
+.warn {
+  background-color: #faad14;
+}
+
+.error {
+  background-color: #ff4d4f;
+}
+
 .header-text {
   white-space: nowrap;
   overflow-x: scroll;
-  margin-right: 10px;
-  cursor: text;
+  cursor: auto;
   margin-right: auto;
 }
 
@@ -126,5 +141,9 @@ const wheel = (event: WheelEvent) => {
 
 .header-text::-webkit-scrollbar-thumb:hover {
   background-color: rgba(0, 0, 0, 0.5);
+}
+
+.right-outlined {
+  margin-left: 10px;
 }
 </style>

@@ -43,7 +43,7 @@ const createWindow = () => {
   mainWindow.setMenu(null)
   let id = 0;
   expressApp.post("/send", function (req, res) {
-    const msg = { id: id++, ...req.body };
+    const msg: Record<string, any> = { id: id++, ...req.body };
     mainWindow.webContents.send('log:msg', msg)
     res.end('ok');
   });

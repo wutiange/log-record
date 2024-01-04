@@ -23,7 +23,7 @@ const useLogStore = defineStore("log", () => {
   const isOpenFilter = ref(false);
   const isScrollToBottom = ref(true);
 
-  const push = (msg: string) => {
+  const push = (msg: Record<string, any>) => {
     const { createTime, message, ...msgObj } = (msg ?? {}) as any
     loggers.value.push({
       text: message.map((e: any) => {

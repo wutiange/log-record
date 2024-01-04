@@ -1,9 +1,10 @@
 <script setup lang="ts">
+const platform = window.electronAPI.platform
 </script>
 
 <template>
   <div class="nav-bar-container">
-    <img src="../../assets/logo.svg" class="logo" alt="" />
+    <img v-if="platform !== 'darwin'" src="../../assets/logo.svg" class="logo" alt="" />
     <span class="title">日志系统</span>
   </div>
 </template>

@@ -4,7 +4,7 @@ import MenuBar from './components/menu-bar.vue';
 import useLogStore from '../stores/log';
 
 const logStore = useLogStore();
-window.electronAPI.onGetLogMsg((msg: any) => {
+window.electronAPI.onGetLogMsg((msg) => {
   console.log(msg)
   logStore.push(msg)
 })

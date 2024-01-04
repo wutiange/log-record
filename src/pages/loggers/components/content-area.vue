@@ -20,6 +20,10 @@ const colorAndText = computed<ColorOrTextType>(() => {
   return {color: 'processing', text: '日志'}
 })
 
+const showLogTime = computed(() => {
+  return new Date(logStore.currentItem?.createTime).toLocaleString()
+})
+
 </script>
 <template v-if="currentItem !== null">
   <div class="format-text">
@@ -29,7 +33,7 @@ const colorAndText = computed<ColorOrTextType>(() => {
     </div>
     <div class="strip">
       <span class="label-item">时间：</span>
-      <span>{{ logStore.currentItem?.createTime }}</span>
+      <span>{{ showLogTime }}</span>
     </div>
     <div class="strip">
       <span class="label-item">环境：</span>

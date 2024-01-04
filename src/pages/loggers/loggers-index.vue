@@ -59,7 +59,6 @@ watch(() => logStore.currentItem, showDrawer);
 .loggers-container {
   display: flex;
   flex-direction: column;
-  width: 0;
   flex: 1;
 }
 

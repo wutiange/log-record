@@ -3,7 +3,7 @@ import { nextTick, ref, watch } from 'vue';
 import useLogStore from '../../../stores/log';
 import type { LogType } from '../../../stores/log';
 import { ArrowRightOutlined } from '@ant-design/icons-vue';
-import { getColorAndText } from '../../../utils/log';
+import { getColorAndText, getHMS } from '../../../utils/log';
 const divRef = ref<HTMLDivElement | null>(null);
 const logStore = useLogStore();
 const mouseScrollHeight = ref(0);
@@ -76,7 +76,7 @@ const wheel = (event: WheelEvent) => {
           <a-tag :color="getColorAndText(item.level).color">{{
             getColorAndText(item.level).text
           }}</a-tag>
-          <a-tag color="default">{{ item.createTime }}</a-tag>
+          <a-tag color="default">{{ getHMS(item.createTime) }}</a-tag>
           <span class="header-text" v-html="item.text" />
           <arrow-right-outlined />
         </a-list-item>
@@ -90,6 +90,7 @@ const wheel = (event: WheelEvent) => {
   overflow-y: scroll;
   flex: 1;
   margin-bottom: 20px;
+  /* height: 200px; */
 }
 
 .log-container::-webkit-scrollbar {

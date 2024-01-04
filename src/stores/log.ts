@@ -24,7 +24,7 @@ const useLogStore = defineStore("log", () => {
   const isScrollToBottom = ref(true);
 
   const push = (msg: Record<string, any>) => {
-    const { createTime, message, ...msgObj } = (msg ?? {}) as any
+    const { message, ...msgObj } = (msg ?? {}) as any
     loggers.value.push({
       text: message.map((e: any) => {
         if (typeof e === 'string') {
@@ -32,7 +32,6 @@ const useLogStore = defineStore("log", () => {
         }
         return JSON.stringify(e)
       }).join(" "),
-      createTime: new Date(createTime).toLocaleString(),
       formatData: message,
       ...msgObj
     });

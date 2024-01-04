@@ -29,10 +29,12 @@ window.electronAPI.onGetLogMsg((msg) => {
   background-color: #ffffff;
   color: #999999;
   flex: 1;
+  height: 0px;
 }
 .body {
   display: flex;
   flex-direction: row;
   flex: 1;
+  height: 0;
 }
 </style>

@@ -11,8 +11,7 @@ const timer = ref<NodeJS.Timeout>();
 
 const scrollToBottom = () => {
   if (divRef.value && logStore.isScrollToBottom) {
-    divRef.value.scrollTop =
-      divRef.value.scrollHeight - divRef.value.offsetHeight;
+    divRef.value.scrollTo({top: divRef.value.scrollHeight, behavior: 'smooth'})
   }
 };
 

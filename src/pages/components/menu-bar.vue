@@ -3,8 +3,8 @@ import { reactive } from 'vue';
 import { useRouter } from 'vue-router';
 const router = useRouter()
 const funcs = reactive([
-  { img: 'src/assets/images/log.svg', path: '/log' },
-  { img: 'src/assets/images/network.svg', path: '/network' },
+  { img: 'src/assets/images/log.svg', path: '/log', text: '日志' },
+  { img: 'src/assets/images/network.svg', path: '/network', text: '网络' },
 ]);
 const selectedObj = reactive<Record<string, boolean>>({
   '/log': true,
@@ -21,14 +21,18 @@ const onSwapFunc = (path: string) => {
 
 <template>
   <div class="menu-bar-container">
-    <div
-      v-for="func in funcs"
-      v-bind:key="func.img"
-      :class="{ 'icon-container': true, 'selected-icon-container': selectedObj[func.path] }"
-      @click="() => onSwapFunc(func.path)"
-    >
-      <img :src="func.img" alt="" :class="{icon: true, 'selected-icon': selectedObj[func.path]}" />
-    </div>
+    <template v-for="func in funcs" v-bind:key="func.img">
+      <a-tooltip placement="right" color="#336666">
+        <template #title>
+          <span>{{ func.text }}</span>
+        </template>
+        <div :class="{ 'icon-container': true, 'selected-icon-container': selectedObj[func.path] }"
+          @click="() => onSwapFunc(func.path)">
+          <img :src="func.img" alt="" :class="{ icon: true, 'selected-icon': selectedObj[func.path] }" />
+        </div>
+      </a-tooltip>
+    </template>
+
   </div>
 </template>
 
@@ -48,14 +52,17 @@ const onSwapFunc = (path: string) => {
   transform: translate(-100px);
   filter: drop-shadow(100px 0 0 #336666);
 }
+
 .icon-container {
   padding: 5px;
   cursor: pointer;
 }
+
 .selected-icon-container {
   background-color: rgba(51, 102, 102, 0.5);
   border-radius: 5px;
 }
+
 .selected-icon {
   filter: drop-shadow(100px 0 0 #fff);
 }

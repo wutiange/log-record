@@ -3,13 +3,14 @@ import { reactive } from 'vue';
 import { useRouter } from 'vue-router';
 const router = useRouter()
 const funcs = reactive([
-  { img: 'src/assets/images/log.svg', path: '/log', text: '日志' },
-  { img: 'src/assets/images/network.svg', path: '/network', text: '网络' },
+  { img: new URL('../../assets/images/log.svg', import.meta.url).href, path: '/log', text: '日志' },
+  { img: new URL('../../assets/images/network.svg', import.meta.url).href, path: '/network', text: '网络' },
 ]);
 const selectedObj = reactive<Record<string, boolean>>({
   '/log': true,
   '/network': false
 })
+
 
 const onSwapFunc = (path: string) => {
   const lastPath = router.currentRoute.value.path

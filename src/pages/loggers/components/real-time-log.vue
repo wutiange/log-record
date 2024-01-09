@@ -1,13 +1,18 @@
 <script setup lang="ts">
-import { nextTick, ref, watch } from 'vue';
+import { computed, nextTick, ref, watch } from 'vue';
 import useLogStore from '../../../stores/log';
 import type { LogType } from '../../../stores/log';
 import { ArrowRightOutlined } from '@ant-design/icons-vue';
-import { getColorAndText, getHMS } from '../../../utils/log';
+import { getHMS } from '../../../utils/log';
 const divRef = ref<HTMLDivElement | null>(null);
 const logStore = useLogStore();
 const mouseScrollHeight = ref(0);
 const timer = ref<NodeJS.Timeout>();
+const props = defineProps<{tabId: string}>()
+
+const finallyLoggers = computed(() => {
+  return logStore.currentFilterResults[props.tabId] ?? []
+})
 
 const scrollToBottom = () => {
   if (divRef.value && logStore.isScrollToBottom) {
@@ -15,16 +20,12 @@ const scrollToBottom = () => {
   }
 };
 
-watch(logStore.loggers, () => {
-  if (!logStore.isOpenFilter) {
-    nextTick(scrollToBottom);
-  }
+watch(finallyLoggers, () => {
+  nextTick(scrollToBottom);
 });
 
 watch(() => logStore.isScrollToBottom, () => {
-  if (!logStore.isOpenFilter) {
-    nextTick(scrollToBottom);
-  }
+  nextTick(scrollToBottom);
 });
 
 const onClickItem = (item: LogType) => {
@@ -65,7 +66,7 @@ const wheel = (event: WheelEvent) => {
 
 <template>
   <div class="log-container" ref="divRef" @scroll="scroll" @wheel="wheel">
-    <a-list size="large" :data-source="logStore.showLoggers" :bordered="false">
+    <a-list size="large" :data-source="finallyLoggers" :bordered="false">
       <template #renderItem="{ item }">
         <a-list-item
           @click="onClickItem(item)"

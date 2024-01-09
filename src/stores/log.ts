@@ -96,7 +96,7 @@ const useLogStore = defineStore("log", () => {
   const clearLoggers = () => {
     loggers.value = []
     if (currentFilterResults.value[currentShowTabId.value]) {
-      delete currentFilterResults.value[currentShowTabId.value]
+      currentFilterResults.value[currentShowTabId.value] = []
     }
   }
 

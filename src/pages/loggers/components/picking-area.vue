@@ -9,6 +9,7 @@ const logStore = useLogStore()
 
 onMounted(() => {
   tabId.value = logStore.allocateID()
+  logStore.swapCurrentShowTabId(tabId.value)
 })
 
 onUnmounted(() => {

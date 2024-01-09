@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import PickingArea from './components/picking-area.vue';
 import ContentArea from './components/content-area.vue';
-import { ref, watch } from 'vue';
+import { onMounted, ref, watch } from 'vue';
 import useLogStore from '../../stores/log';
 
 const logStore = useLogStore();
@@ -20,6 +20,7 @@ const onFollowScrolling = () => {
 };
 
 watch(() => logStore.currentItem, showDrawer);
+
 </script>
 
 <template>

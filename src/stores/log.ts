@@ -31,6 +31,7 @@ const useLogStore = defineStore("log", () => {
   const currentFilterResults = ref<Record<string, LogType[]>>({})
   const tabIds = ref<Set<string>>(new Set())
   const searchFilter = ref<Record<string, SearchFilterType>>({})
+  const currentShowTabId = ref<string>('')
 
 
   const updateAllTabSinleLogger = (_logger: LogType) => {
@@ -94,6 +95,9 @@ const useLogStore = defineStore("log", () => {
 
   const clearLoggers = () => {
     loggers.value = []
+    if (currentFilterResults.value[currentShowTabId.value]) {
+      delete currentFilterResults.value[currentShowTabId.value]
+    }
   }
 
   const updateIsOpenFilter = (isOpen: boolean) => {
@@ -102,6 +106,10 @@ const useLogStore = defineStore("log", () => {
 
   const setIsScrollToBottom = (isScroll: boolean) => {
     isScrollToBottom.value = isScroll
+  }
+
+  const swapCurrentShowTabId = (tabId: string) => {
+    currentShowTabId.value = tabId
   }
 
 
@@ -157,7 +165,8 @@ const useLogStore = defineStore("log", () => {
     currentFilterResults,
     updateSearchFilterByTabId,
     allocateID,
-    removeID
+    removeID,
+    swapCurrentShowTabId
   };
 });
 

@@ -1,6 +1,6 @@
 import { handleSingleTextToSelected, searchTextToCommandsMap } from "@/utils/log";
 import { defineStore } from "pinia";
-import { ref, computed } from "vue";
+import { computed, ref } from "vue";
 
 export type LevelType = "log" | "warn" | "error";
 export type LogType = {
@@ -23,19 +23,16 @@ export type SearchFilterType = {
 }
 
 const useLogStore = defineStore("log", () => {
-  const loggers = ref<LogType[]>([]);
-  const currentItem = ref<LogType | null>(null);
-  const filterLoggers = ref<LogType[]>([]);
-  const isOpenFilter = ref(false);
-  const isScrollToBottom = ref(true);
-  const currentFilterResults = ref<Record<string, LogType[]>>({})
-  const tabIds = ref<Set<string>>(new Set())
-  const searchFilter = ref<Record<string, SearchFilterType>>({})
+  const tabIds = ref<Record<string, {title: string}>>({})
+  const tabOperaHistory = ref<string[]>([])
   const currentShowTabId = ref<string>('')
-
+  const currentItem = ref<LogType | null>(null);
+  const tabIsScrollToBottom = ref<Record<string, boolean>>({})
+  const allTabLoggers = ref<Record<string, LogType[]>>({})
+  const currentFilterResults = ref<Record<string, LogType[]>>({})
+  const searchFilter = ref<Record<string, SearchFilterType>>({})
 
   const updateAllTabSinleLogger = (_logger: LogType) => {
-    const newLogger = {..._logger}
     const oldCurrentFilterResults = currentFilterResults.value;
     const newCurrentFilterResults = {...oldCurrentFilterResults}
     const loggersTabIds = Object.entries(newCurrentFilterResults)
@@ -44,13 +41,13 @@ const useLogStore = defineStore("log", () => {
       const newLoggers = [...loggers]
       const {text = '', isCaseSensitive = false} = searchFilter.value[tabId] ?? {}
       if (!text) {
-        newLoggers.push(newLogger)
+        newLoggers.push(_logger)
         newCurrentFilterResults[tabId] = newLoggers
         isUpdated = true
         return
       }
       const commandObj = searchTextToCommandsMap(text);
-      const {isDone, logger} = handleSingleTextToSelected(newLogger, commandObj, isCaseSensitive)
+      const {isDone, logger} = handleSingleTextToSelected(_logger, commandObj, isCaseSensitive)
       if (isDone) {
         newLoggers.push(logger)
         newCurrentFilterResults[tabId] = newLoggers
@@ -74,38 +71,29 @@ const useLogStore = defineStore("log", () => {
       formatData: message,
       ...msgObj
     }
-    loggers.value.push(newLogger);
-    updateAllTabSinleLogger(newLogger)
+    for (const tabId in allTabLoggers.value) {
+      if (Object.prototype.hasOwnProperty.call(allTabLoggers.value, tabId)) {
+        const loggers = allTabLoggers.value[tabId];
+        loggers.push({...newLogger})
+      }
+    }
+    updateAllTabSinleLogger({...newLogger})
   }
   const updateCurrentItem = (item: LogType) => {
     currentItem.value = { ...item };
   };
 
-  const updateFilterLoggers = (loggers: LogType[]) => {
-    filterLoggers.value = loggers;
-  };
-
-  const showLoggers = computed(() => {
-    if (isOpenFilter.value) {
-      return filterLoggers.value;
-    } else {
-      return loggers.value;
-    }
-  });
-
   const clearLoggers = () => {
-    loggers.value = []
     if (currentFilterResults.value[currentShowTabId.value]) {
       currentFilterResults.value[currentShowTabId.value] = []
-    }
+    } 
+    if (allTabLoggers.value[currentShowTabId.value]) {
+      allTabLoggers.value[currentShowTabId.value] = []
+    } 
   }
 
-  const updateIsOpenFilter = (isOpen: boolean) => {
-    isOpenFilter.value = isOpen
-  }
-
-  const setIsScrollToBottom = (isScroll: boolean) => {
-    isScrollToBottom.value = isScroll
+  const setTabIsScrollToBottomByTabId = (isScroll: boolean) => {
+    tabIsScrollToBottom.value[currentShowTabId.value] = isScroll
   }
 
   const swapCurrentShowTabId = (tabId: string) => {
@@ -116,10 +104,10 @@ const useLogStore = defineStore("log", () => {
   const updateSearchFilterByTabId = (tabId: string, newSearchFilter: SearchFilterType) => {
     const {text = '', isCaseSensitive = false} = newSearchFilter ?? {}
     const commandObj = searchTextToCommandsMap(text);
-  
+    const loggers = allTabLoggers.value[tabId] ?? []
     const newLoggers: LogType[] = [];
-    for (let i = 0; i < loggers.value.length; i++) {
-      const {isDone, logger} = handleSingleTextToSelected(loggers.value[i], commandObj, isCaseSensitive)
+    for (let i = 0; i < loggers.length; i++) {
+      const {isDone, logger} = handleSingleTextToSelected(loggers[i], commandObj, isCaseSensitive)
       if (isDone) {
         newLoggers.push(logger);
       }
@@ -131,42 +119,62 @@ const useLogStore = defineStore("log", () => {
     searchFilter.value[tabId] = newSearchFilter
   }
 
-  const allocateID = () => {
+  const allocateID = (title: string) => {
     let newTabId = Date.now().toString(36)
-    while(tabIds.value.has(newTabId)) {
+    while(tabIds.value[newTabId]) {
       newTabId = Date.now().toString(36)
     }
-    tabIds.value.add(newTabId)
+    if (Object.keys(tabIds.value).length === 0) {
+      currentShowTabId.value = newTabId
+    }
+    tabIds.value[newTabId] = {title}
+    allTabLoggers.value[newTabId] = []
     currentFilterResults.value[newTabId] = []
     return newTabId
   }
 
   const removeID = (tabId: string) => {
-    if (tabIds.value.has(tabId)) {
-      tabIds.value.delete(tabId)
+    if (tabIds.value[tabId]) {
+      delete tabIds.value[tabId]
     }
     if (currentFilterResults.value[tabId]) {
       delete currentFilterResults.value[tabId]
     }
+    if (allTabLoggers.value[tabId]) {
+      delete allTabLoggers.value[tabId]
+    }
+    if (tabId === currentShowTabId.value) {
+      if (tabOperaHistory.value.length === 0) {
+        currentShowTabId.value = allocateID("默认")
+      } else {
+        currentShowTabId.value = tabOperaHistory.value.pop()
+      }
+    }
   }
 
+  const updateTabOperaHistory = (tabId: string) => {
+    tabOperaHistory.value.push(tabId)
+  }
+
+  const isScrollToBottom = computed(() => {
+    return !!tabIsScrollToBottom.value[currentShowTabId.value]
+  })
+
   return {
-    loggers,
     push,
+    currentShowTabId,
     currentItem,
     updateCurrentItem,
-    updateFilterLoggers,
-    showLoggers,
-    isOpenFilter,
-    updateIsOpenFilter,
     clearLoggers,
     isScrollToBottom,
-    setIsScrollToBottom,
+    tabIsScrollToBottom,
+    setTabIsScrollToBottomByTabId,
     currentFilterResults,
     updateSearchFilterByTabId,
     allocateID,
     removeID,
-    swapCurrentShowTabId
+    swapCurrentShowTabId,
+    updateTabOperaHistory
   };
 });
 

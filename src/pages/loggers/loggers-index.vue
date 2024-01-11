@@ -16,16 +16,22 @@ const onClearLog = () => {
 };
 
 const onFollowScrolling = () => {
-  logStore.setIsScrollToBottom(true);
+  logStore.setTabIsScrollToBottomByTabId(true);
 };
 
 watch(() => logStore.currentItem, showDrawer);
+
+onMounted(() => {
+  if (!logStore.currentShowTabId) {
+    logStore.allocateID("默认")
+  }
+})
 
 </script>
 
 <template>
   <div class="loggers-container">
-    <PickingArea />
+    <PickingArea :tab-id="logStore.currentShowTabId" />
     <a-drawer
       v-model:open="open"
       title="日志详情"

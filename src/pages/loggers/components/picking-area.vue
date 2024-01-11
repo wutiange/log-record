@@ -1,26 +1,18 @@
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from 'vue';
+import { onUnmounted } from 'vue';
 import LogSearchFilter from './log-search-filter.vue'
 import RealTimeLog from './real-time-log.vue'
 import useLogStore from '@/stores/log';
-
-const tabId = ref<string>('')
-const logStore = useLogStore()
-
-onMounted(() => {
-  tabId.value = logStore.allocateID()
-  logStore.swapCurrentShowTabId(tabId.value)
-})
-
+const logStore = useLogStore();
+const props = defineProps<{tabId: string}>()
 onUnmounted(() => {
-  logStore.removeID(tabId.value)
+  logStore.removeID(props.tabId)
 })
-
 </script>
 
 <template>
-  <LogSearchFilter v-if="tabId !== ''" :tabId="tabId" />
-  <RealTimeLog v-if="tabId !== ''" :tabId="tabId" />
+  <LogSearchFilter v-if="props.tabId !== ''" :tabId="props.tabId" />
+  <RealTimeLog v-if="props.tabId !== ''" :tabId="props.tabId" />
 </template>
 
 <style scoped></style>

@@ -33,7 +33,7 @@ const onClickItem = (item: LogType) => {
   const selectedText = window.getSelection()?.toString();
   if (selectedText?.length) return;
   timer.value = setTimeout(() => {
-    logStore.setIsScrollToBottom(false);
+    logStore.setTabIsScrollToBottomByTabId(false);
     logStore.updateCurrentItem(item);
     timer.value && clearTimeout(timer.value);
   }, 200);
@@ -44,7 +44,7 @@ const scroll = () => {
     const clientHeight = divRef.value.clientHeight;
     const scrollHeight = divRef.value.scrollHeight;
     if (scrollTop + clientHeight >= scrollHeight) {
-      logStore.setIsScrollToBottom(true);
+      logStore.setTabIsScrollToBottomByTabId(true);
     }
   }
 };
@@ -57,7 +57,7 @@ const wheel = (event: WheelEvent) => {
   }
   timer = setTimeout(() => {
     if (mouseScrollHeight.value < -40) {
-      logStore.setIsScrollToBottom(false);
+      logStore.setTabIsScrollToBottomByTabId(false);
     }
     mouseScrollHeight.value = 0;
   }, 200);

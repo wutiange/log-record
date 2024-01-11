@@ -3,14 +3,15 @@ import PickingArea from './components/picking-area.vue';
 import ContentArea from './components/content-area.vue';
 import { onMounted, ref, watch } from 'vue';
 import useLogStore from '../../stores/log';
+import { message } from 'ant-design-vue';
 
 const logStore = useLogStore();
 const open = ref<boolean>(false);
+const tabNameVisible = ref<boolean>(false);
+const tabName = ref('')
 const showDrawer = () => {
   open.value = true;
 };
-
-console.log(logStore.tabIds)
 
 const onClearLog = () => {
   logStore.clearLoggers();
@@ -22,9 +23,7 @@ const onFollowScrolling = () => {
 
 const onEdit = (targetKey: string, action: string) => {
   if (action === 'add') {
-    const tabId = logStore.allocateID("尝试")
-    logStore.swapCurrentShowTabId(tabId)
-    logStore.updateTabOperaHistory(tabId)
+    tabNameVisible.value = true
   } else if (action === 'remove') {
     logStore.removeID(targetKey)
   }
@@ -32,6 +31,17 @@ const onEdit = (targetKey: string, action: string) => {
 
 const onChange = (targetKey: string) => {
   logStore.updateTabOperaHistory(targetKey)
+}
+
+const onConfirm = () => {
+  if (!tabName.value) {
+    message.warning('名称不能马虎，至少写一个');
+    return
+  }
+  const tabId = logStore.allocateID(tabName.value)
+  logStore.swapCurrentShowTabId(tabId)
+  logStore.updateTabOperaHistory(tabId)
+  tabNameVisible.value = false
 }
 
 watch(() => logStore.currentItem, showDrawer);
@@ -47,8 +57,8 @@ onMounted(() => {
 
 <template>
   <div class="loggers-container">
-    <a-tabs v-model:activeKey="logStore.currentShowTabId" @change="onChange" type="editable-card" @edit="onEdit" class="tabs"
-      :tabBarGutter="10">
+    <a-tabs v-model:activeKey="logStore.currentShowTabId" @change="onChange" type="editable-card" @edit="onEdit"
+      class="tabs" :tabBarGutter="10">
       <a-tab-pane v-for="tabIdObj in logStore.tabIds" :key="tabIdObj.tabId" :tab="tabIdObj.title">
         <PickingArea :tab-id="tabIdObj.tabId" />
       </a-tab-pane>
@@ -67,6 +77,9 @@ onMounted(() => {
           :class="{ 'img-select': logStore.isScrollToBottom }" />
       </a-tooltip>
     </div>
+    <a-modal v-model:open="tabNameVisible" @ok="onConfirm" :closable="false">
+      <a-input v-model:value="tabName" placeholder="请输入Tab名称" />
+    </a-modal>
   </div>
 </template>
 

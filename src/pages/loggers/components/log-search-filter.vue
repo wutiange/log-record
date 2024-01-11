@@ -70,7 +70,7 @@ onUnmounted(clearTimer)
   display: flex;
   flex-direction: row;
   align-items: center;
-  margin: 10px;
+  margin: 0 10px 10px 10px;
   gap: 10px;
   width: 50%;
 }

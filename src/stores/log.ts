@@ -23,7 +23,7 @@ export type SearchFilterType = {
 }
 
 const useLogStore = defineStore("log", () => {
-  const tabIds = ref<Record<string, {title: string}>>({})
+  const tabIds = ref<{title: string, tabId: string}[]>([])
   const tabOperaHistory = ref<string[]>([])
   const currentShowTabId = ref<string>('')
   const currentItem = ref<LogType | null>(null);
@@ -119,23 +119,33 @@ const useLogStore = defineStore("log", () => {
     searchFilter.value[tabId] = newSearchFilter
   }
 
+  const isContainTabId = (tabId: string) => {
+    for (let i = 0; i < tabIds.value.length; i ++) {
+      const tabIdObj = tabIds.value[i]
+      if (tabIdObj.tabId === tabId) {
+        return true
+      }
+    }
+    return false
+  }
+
   const allocateID = (title: string) => {
     let newTabId = Date.now().toString(36)
-    while(tabIds.value[newTabId]) {
+    while(isContainTabId(newTabId)) {
       newTabId = Date.now().toString(36)
     }
     if (Object.keys(tabIds.value).length === 0) {
       currentShowTabId.value = newTabId
     }
-    tabIds.value[newTabId] = {title}
+    tabIds.value.push({title, tabId: newTabId})
     allTabLoggers.value[newTabId] = []
     currentFilterResults.value[newTabId] = []
     return newTabId
   }
 
   const removeID = (tabId: string) => {
-    if (tabIds.value[tabId]) {
-      delete tabIds.value[tabId]
+    if (isContainTabId(tabId)) {
+      tabIds.value = tabIds.value.filter(e => e.tabId !== tabId)
     }
     if (currentFilterResults.value[tabId]) {
       delete currentFilterResults.value[tabId]
@@ -143,9 +153,13 @@ const useLogStore = defineStore("log", () => {
     if (allTabLoggers.value[tabId]) {
       delete allTabLoggers.value[tabId]
     }
+    if (tabOperaHistory.value.includes(tabId)) {
+      tabOperaHistory.value = tabOperaHistory.value.filter(e => e !== tabId)
+    }
     if (tabId === currentShowTabId.value) {
       if (tabOperaHistory.value.length === 0) {
         currentShowTabId.value = allocateID("默认")
+        updateTabOperaHistory(currentShowTabId.value)
       } else {
         currentShowTabId.value = tabOperaHistory.value.pop()
       }
@@ -174,7 +188,8 @@ const useLogStore = defineStore("log", () => {
     allocateID,
     removeID,
     swapCurrentShowTabId,
-    updateTabOperaHistory
+    updateTabOperaHistory,
+    tabIds
   };
 });
 

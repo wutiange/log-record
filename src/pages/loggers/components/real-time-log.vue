@@ -85,9 +85,9 @@ const wheel = (event: WheelEvent) => {
 
 <style scoped>
 .log-container {
-  overflow-y: scroll;
+  overflow-y: auto;
+  margin-bottom: 10px;
   flex: 1;
-  margin-bottom: 20px;
 }
 
 .log-container::-webkit-scrollbar {

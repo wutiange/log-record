@@ -3,7 +3,9 @@ import { reactive } from 'vue';
 import { useRouter } from 'vue-router';
 const router = useRouter()
 const funcs = reactive([
+  // @ts-ignore
   { img: new URL('../../assets/images/log.svg', import.meta.url).href, path: '/log', text: '日志' },
+  // @ts-ignore
   { img: new URL('../../assets/images/network.svg', import.meta.url).href, path: '/network', text: '网络' },
 ]);
 const selectedObj = reactive<Record<string, boolean>>({

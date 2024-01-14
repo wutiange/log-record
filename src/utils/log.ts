@@ -41,14 +41,19 @@ export function getHMS(timestamp: number) {
   return `${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
 }
 
-export function searchTextToCommandsMap(searchText: string): Map<string, string[]> {
+export function searchTextToCommandsMap(
+  searchText: string
+): Map<string, string[]> {
   const commandObj = new Map();
   if (!searchText) {
-    return commandObj
+    return commandObj;
   }
   const searchArr = searchText.split(" ");
   for (let i = 0; i < searchArr.length; i++) {
     const e = searchArr[i];
+    if (typeof e === 'string' && e.length <= 0) {
+      continue;
+    }
     if (e.includes(":") && !e.includes("\\:")) {
       // 说明是指令
       const commandArr = e.split(":");
@@ -119,13 +124,17 @@ export function handleTextCommand(
   }
 }
 
-export function handleSingleTextToSelected(_logger: LogType, commandObj: Map<string, string[]>, isCaseSensitive = false) {
+export function handleSingleTextToSelected(
+  _logger: LogType,
+  commandObj: Map<string, string[]>,
+  isCaseSensitive = false
+) {
   const logger = { ..._logger };
   if (!commandObj.size) {
-    return {isDone: true, logger}
+    return { isDone: true, logger };
   }
   if (handleTextCommand(commandObj, logger, isCaseSensitive) === false) {
-    return {isDone: false, logger};
+    return { isDone: false, logger };
   }
   const allCommand = commandObj.entries();
   let currentCommand = allCommand.next();
@@ -138,9 +147,9 @@ export function handleSingleTextToSelected(_logger: LogType, commandObj: Map<str
       !["formatData", "text"].includes(command) &&
       !values.includes(logger[command]?.toString() ?? "")
     ) {
-      return {isDone: false, logger}
+      return { isDone: false, logger };
     }
     currentCommand = allCommand.next();
   }
-  return {isDone: currentCommand.done, logger}
+  return { isDone: currentCommand.done, logger };
 }

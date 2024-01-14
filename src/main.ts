@@ -41,7 +41,7 @@ const createWindow = () => {
     }
   })
 
-  globalShortcut.register('F12', () => {
+  globalShortcut.register('Alt+F12', () => {
     // Open the DevTools.
     mainWindow.webContents.openDevTools();
   })

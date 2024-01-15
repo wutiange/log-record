@@ -15,8 +15,8 @@ class ServerClient {
     let id = 0;
     Object.entries(pathHandle).forEach(([path, handle]) => {
       this.app.post(path, function (req, res) {
-        handle({ id: id++, ...req.body })
-        res.end('ok');
+        handle({ id: ++id, ...req.body })
+        res.end(id.toString());
       });
     })
     

@@ -38,6 +38,9 @@ const createWindow = () => {
   serverClient.startListen({
     '/log': (msg) => {
       mainWindow.webContents.send('log:msg', msg)
+    },
+    '/network': (msg) => {
+      mainWindow.webContents.send('network:msg', msg)
     }
   })
 

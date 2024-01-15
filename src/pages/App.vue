@@ -2,10 +2,18 @@
 import NavBar from './components/nav-bar.vue';
 import MenuBar from './components/menu-bar.vue';
 import useLogStore from '../stores/log';
+import useNetworkStore from '@/stores/network';
 
 const logStore = useLogStore();
+const networkStore = useNetworkStore();
+
 window.electronAPI.onGetLogMsg((msg) => {
   logStore.push(msg)
+})
+
+window.electronAPI.onGetNetworkMsg((msg: any) => {
+  console.log("关于网络的信息收取", msg)
+  networkStore.unshift(msg)
 })
 
 

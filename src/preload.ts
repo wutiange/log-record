@@ -4,5 +4,6 @@ import {contextBridge, ipcRenderer} from 'electron'
 
 contextBridge.exposeInMainWorld('electronAPI', {
   platform: process.platform,
-  onGetLogMsg: (callback: any) => ipcRenderer.on('log:msg', (_event, value) => callback(value))
+  onGetLogMsg: (callback: any) => ipcRenderer.on('log:msg', (_event, value) => callback(value)),
+  onGetNetworkMsg: (callback: any) => ipcRenderer.on('network:msg', (_event, value) => callback(value))
 })

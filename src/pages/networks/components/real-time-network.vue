@@ -1,42 +1,73 @@
 <script setup lang="ts">
-import { computed, nextTick, ref, watch } from 'vue';
+import { ref, watch } from 'vue';
 import useNetworkStore, { Network } from '@/stores/network';
 import { ArrowRightOutlined } from '@ant-design/icons-vue';
 import { getHMS } from '@/utils/log';
-const divRef = ref<HTMLDivElement | null>(null);
 const networkStore = useNetworkStore();
-const mouseScrollHeight = ref(0);
 const timer = ref<NodeJS.Timeout>();
-const props = defineProps<{tabId: string}>()
-
-
-
+const columns = ref([
+  {
+    title: '方法',
+    dataIndex: 'method',
+    key: 'method',
+  },
+  {
+    title: '请求时间',
+    dataIndex: 'createTime',
+    key: 'createTime',
+  },
+  {
+    title: '地址',
+    dataIndex: 'url',
+    key: 'url',
+  },
+  {
+    title: '状态',
+    dataIndex: 'statusCode',
+    key: 'statusCode'
+  },
+  {
+    title: '耗时',
+    dataIndex: 'endTime',
+    key: 'endTime'
+  }
+],)
 
 const onClickItem = (item: Network) => {
   timer.value && clearTimeout(timer.value);
   const selectedText = window.getSelection()?.toString();
   if (selectedText?.length) return;
-  
-  networkStore.updateCurrentSelectNetwork(item);
+
+  networkStore.updateCurrentSelectNetwork({...item});
 };
+
+function customRow(record: any) {
+  return {
+    onClick: () => onClickItem(record)
+  }
+}
 </script>
 
 <template>
   <div class="log-container">
-    <a-list size="large" :data-source="networkStore.networks" :bordered="false">
-      <template #renderItem="{ item }">
-        <a-list-item
-          @click="onClickItem(item)"
-          class="list-item"
-          :class="networkStore.currentSelectNetwork?.id === item.id && 'select-back'"
-        >
-          <div :class="`log-level-sign ${item.level}`" />
-          <a-tag color="default">{{ getHMS(item.createTime) }}</a-tag>
-          <span class="header-text" v-html="item.text" />
-          <arrow-right-outlined class="right-outlined" />
-        </a-list-item>
+    <a-table :dataSource="networkStore.networks" :columns="columns" :customRow="customRow">
+    <template #bodyCell="{ column, record }">
+      <template v-if="column.key === 'method'">
+        <span>{{ record.method.toLocaleUpperCase() }}</span>
       </template>
-    </a-list>
+      <template v-if="column.key === 'createTime'">
+        <span>{{ getHMS(record.createTime) }}</span>
+      </template>
+      <template v-if="column.key === 'statusCode'">
+        <a-spin v-if="!record.statusCode" />
+        <span v-else>{{ record.statusCode }}</span>
+      </template>
+      <template v-if="column.key === 'endTime'">
+        <span v-if="!record.statusCode">-</span>
+        <span v-else>{{ record.endTime - record.createTime }}ms</span>
+      </template>
+    </template>
+    </a-table>
   </div>
 </template>
 
@@ -45,11 +76,14 @@ const onClickItem = (item: Network) => {
   overflow-y: auto;
   margin-bottom: 10px;
   flex: 1;
+  margin: 10px;
 }
+
 
 .log-container::-webkit-scrollbar {
   display: none;
 }
+
 
 .list-item:hover {
   background-color: #f5f5f5;
@@ -84,6 +118,7 @@ const onClickItem = (item: Network) => {
   overflow-x: scroll;
   cursor: auto;
   margin-right: auto;
+  margin-left: 8px;
 }
 
 .header-text::-webkit-scrollbar {

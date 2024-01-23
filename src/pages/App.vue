@@ -12,7 +12,6 @@ window.electronAPI.onGetLogMsg((msg) => {
 })
 
 window.electronAPI.onGetNetworkMsg((msg: any) => {
-  console.log("关于网络的信息收取", msg)
   networkStore.unshift(msg)
 })
 

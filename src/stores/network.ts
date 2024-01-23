@@ -5,27 +5,29 @@ export type Network = {
   id: number;
   requestId?: number;
   url: string;
-  createTime: number;
-  method: string;
-  reqHeaders: Record<string, any>;
-  resHanders: Record<string, any>;
-  reqBody: string;
-  resBody: string;
-  statusCode: number
+  createTime?: number;
+  method?: string;
+  reqHeaders?: Record<string, any>;
+  resHanders?: Record<string, any>;
+  reqBody?: string;
+  resBody?: string;
+  statusCode?: number;
+  endTime?: number
 }
 
 const useNetworkStore = defineStore('network', () => {
   const networks = ref<Network[]>([])
   const currentSelectNetwork = ref<Network | null>(null)
 
-  function unshift(msg: Network) {
+  function unshift(msg: any) {
     if (msg.requestId) {
       const index = networks.value.findIndex(e => e.id === msg.requestId)
       if (typeof networks.value[index] === 'object') {
         Object.assign(networks.value[index], {
           resHanders: msg.headers,
           resBody: msg.body,
-          statusCode: msg.statusCode
+          statusCode: msg.statusCode,
+          endTime: msg.endTime
         })
       }
     } else {
@@ -34,7 +36,8 @@ const useNetworkStore = defineStore('network', () => {
         url: msg.url,
         method: msg.method,
         reqHeaders: msg.headers,
-        reqBody: msg.body
+        reqBody: msg.body,
+        createTime: msg.createTime,
       })
     }
   }

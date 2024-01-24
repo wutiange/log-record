@@ -23,7 +23,7 @@ const colorAndText = computed<ColorOrTextType>(() => {
 
 const showLogTime = computed(() => {
   if (logStore.currentItem?.createTime) {
-    return dayjs(logStore.currentItem?.createTime).format("MM-DD HH mm ss")
+    return dayjs(logStore.currentItem?.createTime).format("YYYY-MM-DD HH:mm:ss")
   }
 })
 

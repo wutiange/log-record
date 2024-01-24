@@ -74,7 +74,7 @@ const wheel = (event: WheelEvent) => {
           :class="logStore.currentItem?.id === item.id && 'select-back'"
         >
           <div :class="`log-level-sign ${item.level}`" />
-          <a-tag color="default">{{ dayjs(item.createTime).format("MM-DD HH mm ss") }}</a-tag>
+          <a-tag color="default">{{ dayjs(item.createTime).format("HH:mm:ss") }}</a-tag>
           <span class="header-text" v-html="item.text" />
           <arrow-right-outlined class="right-outlined" />
         </a-list-item>

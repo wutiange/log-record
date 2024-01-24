@@ -55,7 +55,7 @@ function customRow(record: any) {
         <span>{{ record.method.toLocaleUpperCase() }}</span>
       </template>
       <template v-if="column.key === 'createTime'">
-        <span>{{ dayjs(record.createTime).format("MM-DD HH mm ss") }}</span>
+        <span>{{ dayjs(record.createTime).format("HH:mm:ss") }}</span>
       </template>
       <template v-if="column.key === 'statusCode'">
         <a-spin v-if="!record.statusCode" />

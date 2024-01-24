@@ -17,7 +17,7 @@ const { currentSelectNetwork: csn } = storeToRefs(networkStore)
     </div>
     <div class="strip">
       <span class="label-item">请求时间：</span>
-      <span>{{ dayjs(csn.createTime).format("MM-DD HH mm ss") }}</span>
+      <span>{{ dayjs(csn.createTime).format("YYYY-MM-DD HH:mm:ss") }}</span>
     </div>
     <div class="strip">
       <span class="label-item">请求头：</span>

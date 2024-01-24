@@ -8,11 +8,12 @@ export type Network = {
   createTime?: number;
   method?: string;
   reqHeaders?: Record<string, any>;
-  resHanders?: Record<string, any>;
+  resHeaders?: Record<string, any>;
   reqBody?: string;
   resBody?: string;
   statusCode?: number;
-  endTime?: number
+  endTime?: number;
+  isTimeout?: boolean
 }
 
 const useNetworkStore = defineStore('network', () => {
@@ -24,10 +25,11 @@ const useNetworkStore = defineStore('network', () => {
       const index = networks.value.findIndex(e => e.id === msg.requestId)
       if (typeof networks.value[index] === 'object') {
         Object.assign(networks.value[index], {
-          resHanders: msg.headers,
+          resHeaders: msg.headers,
           resBody: msg.body,
           statusCode: msg.statusCode,
-          endTime: msg.endTime
+          endTime: msg.endTime,
+          isTimeout: msg.isTimeout,
         })
       }
     } else {

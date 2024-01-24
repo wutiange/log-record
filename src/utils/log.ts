@@ -31,16 +31,6 @@ export const getColorAndText = (level: LevelType) => {
   }) as ColorOrTextType;
 };
 
-/**
- * 根据时间戳得到时分秒
- * @param timestamp 时间戳
- * @returns 时分秒
- */
-export function getHMS(timestamp: number) {
-  const now: Date = new Date(timestamp);
-  return `${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
-}
-
 export function searchTextToCommandsMap(
   searchText: string
 ): Map<string, string[]> {

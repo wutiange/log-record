@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue';
-import useLogStore from '../../../stores/log';
-import type { LogType } from '../../../stores/log';
+import useLogStore from '@/stores/log';
+import type { LogType } from '@/stores/log';
 import { ArrowRightOutlined } from '@ant-design/icons-vue';
-import { getHMS } from '../../../utils/log';
+import dayjs from 'dayjs'
 const divRef = ref<HTMLDivElement | null>(null);
 const logStore = useLogStore();
 const mouseScrollHeight = ref(0);
@@ -74,7 +74,7 @@ const wheel = (event: WheelEvent) => {
           :class="logStore.currentItem?.id === item.id && 'select-back'"
         >
           <div :class="`log-level-sign ${item.level}`" />
-          <a-tag color="default">{{ getHMS(item.createTime) }}</a-tag>
+          <a-tag color="default">{{ dayjs(item.createTime).format("MM-DD HH mm ss") }}</a-tag>
           <span class="header-text" v-html="item.text" />
           <arrow-right-outlined class="right-outlined" />
         </a-list-item>

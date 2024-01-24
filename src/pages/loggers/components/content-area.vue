@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import type { ColorOrTextType } from '../../../utils/log';
-import { getColorAndText } from '../../../utils/log';
-import useLogStore from '../../../stores/log';
+import type { ColorOrTextType } from '@/utils/log';
+import { getColorAndText } from '@/utils/log';
+import useLogStore from '@/stores/log';
 import { computed } from 'vue';
+import dayjs from 'dayjs'
 const logStore = useLogStore()
 const currentLog = computed(() => {
   return logStore.currentItem?.formatData?.map((e) => {
@@ -21,7 +22,9 @@ const colorAndText = computed<ColorOrTextType>(() => {
 })
 
 const showLogTime = computed(() => {
-  return new Date(logStore.currentItem?.createTime).toLocaleString()
+  if (logStore.currentItem?.createTime) {
+    return dayjs(logStore.currentItem?.createTime).format("MM-DD HH mm ss")
+  }
 })
 
 </script>

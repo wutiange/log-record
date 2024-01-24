@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref } from 'vue';
+import dayjs from 'dayjs'
 import useNetworkStore, { Network } from '@/stores/network';
-import { ArrowRightOutlined } from '@ant-design/icons-vue';
-import { getHMS } from '@/utils/log';
 const networkStore = useNetworkStore();
 const timer = ref<NodeJS.Timeout>();
 const columns = ref([
@@ -56,7 +55,7 @@ function customRow(record: any) {
         <span>{{ record.method.toLocaleUpperCase() }}</span>
       </template>
       <template v-if="column.key === 'createTime'">
-        <span>{{ getHMS(record.createTime) }}</span>
+        <span>{{ dayjs(record.createTime).format("MM-DD HH mm ss") }}</span>
       </template>
       <template v-if="column.key === 'statusCode'">
         <a-spin v-if="!record.statusCode" />

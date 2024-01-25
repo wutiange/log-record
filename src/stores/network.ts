@@ -13,24 +13,26 @@ export type Network = {
   resBody?: string;
   statusCode?: number;
   endTime?: number;
-  isTimeout?: boolean
-}
+  isTimeout?: boolean;
+};
 
-const useNetworkStore = defineStore('network', () => {
-  const networks = ref<Network[]>([])
-  const currentSelectNetwork = ref<Network | null>(null)
+const useNetworkStore = defineStore("network", () => {
+  const networks = ref<Network[]>([]);
+  const currentSelectNetwork = ref<Network | null>(null);
 
   function unshift(msg: any) {
-    if (msg.requestId) {
-      const index = networks.value.findIndex(e => e.id === msg.requestId)
-      if (typeof networks.value[index] === 'object') {
+    if (msg.isResponseError) {
+      Object.assign(networks.value[index], { isResponseError: true });
+    } else if (msg.requestId) {
+      const index = networks.value.findIndex((e) => e.id === msg.requestId);
+      if (typeof networks.value[index] === "object") {
         Object.assign(networks.value[index], {
           resHeaders: msg.headers,
           resBody: msg.body,
           statusCode: msg.statusCode,
           endTime: msg.endTime,
           isTimeout: msg.isTimeout,
-        })
+        });
       }
     } else {
       networks.value.unshift({
@@ -40,20 +42,20 @@ const useNetworkStore = defineStore('network', () => {
         reqHeaders: msg.headers,
         reqBody: msg.body,
         createTime: msg.createTime,
-      })
+        isResponseError: msg.isResponseError ?? false,
+      });
     }
   }
 
   function updateCurrentSelectNetwork(currentNetwork: Network) {
-    currentSelectNetwork.value = currentNetwork
+    currentSelectNetwork.value = currentNetwork;
   }
   return {
-    networks, 
-    unshift, 
+    networks,
+    unshift,
     currentSelectNetwork,
-    updateCurrentSelectNetwork
-  }
-})
+    updateCurrentSelectNetwork,
+  };
+});
 
-
-export default useNetworkStore
+export default useNetworkStore;

@@ -2,10 +2,18 @@
 import useNetworkStore from '@/stores/network';
 import { storeToRefs } from 'pinia';
 import dayjs from 'dayjs'
+import { computed, watch } from 'vue';
 
 const networkStore = useNetworkStore();
 
 const { currentSelectNetwork: csn } = storeToRefs(networkStore)
+
+const body = computed(() => {
+  if (csn.value.resHeaders['content-type'].includes('application/json')) {
+    return JSON.stringify(JSON.parse(csn.value.resBody), null, 2)
+  }
+  return csn.value.resBody
+})
 
 </script>
 
@@ -31,14 +39,14 @@ const { currentSelectNetwork: csn } = storeToRefs(networkStore)
     </div>
     <div class="strip">
       <span class="label-item">请求体：</span>
-      <highlightjs v-if="csn.reqBody" autodetect :code="csn.reqBody + ''" />
+      <highlightjs v-if="csn.reqBody" autodetect :code="csn.reqBody" />
       <span v-else>空</span>
     </div>
     <div class="br" />
     <template v-if="csn.statusCode">
       <div class="strip">
         <span class="label-item">响应时间：</span>
-        <span>{{ csn.endTime }}</span>
+        <span>{{ dayjs(csn.endTime).format("YYYY-MM-DD HH:mm:ss") }}</span>
       </div>
       <div class="strip">
         <span class="label-item">响应状态：</span>
@@ -56,7 +64,7 @@ const { currentSelectNetwork: csn } = storeToRefs(networkStore)
       </div>
       <div class="strip">
         <span class="label-item">响应体：</span>
-        <highlightjs v-if="csn.resBody" autodetect :code="csn.resBody + ''" />
+        <highlightjs v-if="csn.resBody" class="highlight" autodetect :code="body" />
         <span v-else>空</span>
       </div>
     </template>
@@ -113,5 +121,10 @@ const { currentSelectNetwork: csn } = storeToRefs(networkStore)
   width: 100%;
   height: 2px;
   background-color: #ccc;
+}
+
+.highlight {
+  flex: 1;
+  border-radius: 5px;
 }
 </style>

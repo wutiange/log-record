@@ -8,11 +8,24 @@ const networkStore = useNetworkStore();
 
 const { currentSelectNetwork: csn } = storeToRefs(networkStore)
 
-const body = computed(() => {
-  if (csn.value.resHeaders['content-type'].includes('application/json')) {
-    return JSON.stringify(JSON.parse(csn.value.resBody), null, 2)
+const getBody = (source: string, headers: Record<string, any> = {}) => {
+  const headersArr = Object.entries(headers)
+  for (let i = 0; i < headersArr.length; i++) {
+    const [key, value] = headersArr[i];
+    const lowerKey = key.toLocaleLowerCase()
+    if (lowerKey === 'content-type' && value.includes('application/json')) {
+      return JSON.stringify(JSON.parse(source), null, 2)
+    }
   }
-  return csn.value.resBody
+  return source
+}
+
+const reqBody = computed(() => {
+  return getBody(csn.value.reqBody, csn.value.reqHeaders)
+})
+
+const resBody = computed(() => {
+  return getBody(csn.value.resBody, csn.value.resHeaders)
 })
 
 </script>
@@ -39,7 +52,7 @@ const body = computed(() => {
     </div>
     <div class="strip">
       <span class="label-item">请求体：</span>
-      <highlightjs v-if="csn.reqBody" autodetect :code="csn.reqBody" />
+      <highlightjs v-if="csn.reqBody" autodetect :code="reqBody" />
       <span v-else>空</span>
     </div>
     <div class="br" />
@@ -64,7 +77,7 @@ const body = computed(() => {
       </div>
       <div class="strip">
         <span class="label-item">响应体：</span>
-        <highlightjs v-if="csn.resBody" class="highlight" autodetect :code="body" />
+        <highlightjs v-if="csn.resBody" class="highlight" autodetect :code="resBody" />
         <span v-else>空</span>
       </div>
     </template>
@@ -106,15 +119,17 @@ const body = computed(() => {
 }
 
 .column-text {
-  flex: 1;
   border-right: 1px solid #eee;
   padding: 8px 10px;
   align-self: stretch;
+  width: 30%;
+  font-weight: 500;
 }
 
 .column-value-text {
-  flex: 2;
   padding: 8px 10px;
+  width: 70%;
+  word-wrap: break-word;
 }
 
 .br {

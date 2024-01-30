@@ -78,6 +78,7 @@ onMounted(() => {
       title="日志详情"
       placement="right"
       width="60%"
+      :closable="false"
     >
       <ContentArea />
     </a-drawer>

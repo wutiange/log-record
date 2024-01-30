@@ -3,7 +3,6 @@ import { ref } from 'vue';
 import dayjs from 'dayjs'
 import useNetworkStore, { Network } from '@/stores/network';
 const networkStore = useNetworkStore();
-const timer = ref<NodeJS.Timeout>();
 const columns = ref([
   {
     title: '方法',
@@ -33,10 +32,8 @@ const columns = ref([
 ],)
 
 const onClickItem = (item: Network) => {
-  timer.value && clearTimeout(timer.value);
   const selectedText = window.getSelection()?.toString();
   if (selectedText?.length) return;
-
   networkStore.updateCurrentSelectNetwork({...item});
 };
 

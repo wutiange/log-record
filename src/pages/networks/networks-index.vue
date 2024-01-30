@@ -8,12 +8,16 @@ const networkStore = useNetworkStore();
 const showDrawer = () => {
   open.value = true;
 };
+
 watch(() => networkStore.currentSelectNetwork, showDrawer);
 </script>
 
 <template>
   <RealTimeNetwork />
-  <a-drawer v-model:open="open" title="网络详情" placement="right" width="60%">
+  <a-drawer :closable="false" v-model:open="open" title="网络详情" placement="right" width="60%">
     <ContentArea />
   </a-drawer>
 </template>
+
+<style scoped>
+</style>

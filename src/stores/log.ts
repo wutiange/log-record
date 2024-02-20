@@ -32,7 +32,7 @@ const useLogStore = defineStore("log", () => {
   const currentFilterResults = ref<Record<string, LogType[]>>({})
   const searchFilter = ref<Record<string, SearchFilterType>>({})
 
-  const updateAllTabSinleLogger = (_logger: LogType) => {
+  const updateAllTabSingleLogger = (_logger: LogType) => {
     const oldCurrentFilterResults = currentFilterResults.value;
     const newCurrentFilterResults = {...oldCurrentFilterResults}
     const loggersTabIds = Object.entries(newCurrentFilterResults)
@@ -77,7 +77,7 @@ const useLogStore = defineStore("log", () => {
         loggers.push({...newLogger})
       }
     }
-    updateAllTabSinleLogger({...newLogger})
+    updateAllTabSingleLogger({...newLogger})
   }
   const updateCurrentItem = (item: LogType) => {
     currentItem.value = { ...item };

@@ -54,10 +54,14 @@ function customRow(record: any) {
       <template v-if="column.key === 'createTime'">
         <span>{{ dayjs(record.createTime).format("HH:mm:ss") }}</span>
       </template>
-      <template v-if="column.key === 'statusCode'">
-        <a-spin v-if="!record.statusCode" />
+
+      <template v-else-if="column.key === 'statusCode'">
+        <span v-if="record.isResponseError">错误</span>
+        <span v-else-if="record.isTimeout">超时</span>
+        <a-spin v-else-if="!record.statusCode" />
         <span v-else>{{ record.statusCode }}</span>
       </template>
+
       <template v-if="column.key === 'endTime'">
         <span v-if="!record.statusCode">-</span>
         <span v-else>{{ record.endTime - record.createTime }}ms</span>

@@ -14,6 +14,7 @@ export type Network = {
   statusCode?: number;
   endTime?: number;
   isTimeout?: boolean;
+  isResponseError?: boolean
 };
 
 const useNetworkStore = defineStore("network", () => {
@@ -21,20 +22,8 @@ const useNetworkStore = defineStore("network", () => {
   const currentSelectNetwork = ref<Network | null>(null);
 
   function unshift(msg: any) {
-    if (msg.isResponseError) {
-      Object.assign(networks.value[index], { isResponseError: true });
-    } else if (msg.requestId) {
-      const index = networks.value.findIndex((e) => e.id === msg.requestId);
-      if (typeof networks.value[index] === "object") {
-        Object.assign(networks.value[index], {
-          resHeaders: msg.headers,
-          resBody: msg.body,
-          statusCode: msg.statusCode,
-          endTime: msg.endTime,
-          isTimeout: msg.isTimeout,
-        });
-      }
-    } else {
+    const index = networks.value.findIndex((e) => e.id === msg.requestId);
+    if (index === -1) {
       networks.value.unshift({
         id: msg.id,
         url: msg.url,
@@ -44,6 +33,19 @@ const useNetworkStore = defineStore("network", () => {
         createTime: msg.createTime,
         isResponseError: msg.isResponseError ?? false,
       });
+    } else if (msg.isResponseError) {
+      Object.assign(networks.value[index], { isResponseError: true });
+    } else if (msg.isTimeout) {
+      Object.assign(networks.value[index], { isTimeout: true });
+    } else if (msg.requestId) {
+      if (typeof networks.value[index] === "object") {
+        Object.assign(networks.value[index], {
+          resHeaders: msg.headers,
+          resBody: msg.body,
+          statusCode: msg.statusCode,
+          endTime: msg.endTime,
+        });
+      }
     }
   }
 

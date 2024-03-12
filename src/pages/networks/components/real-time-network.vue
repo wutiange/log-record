@@ -49,7 +49,7 @@ function customRow(record: any) {
     <a-table :dataSource="networkStore.networks" :columns="columns" :customRow="customRow">
     <template #bodyCell="{ column, record }">
       <template v-if="column.key === 'method'">
-        <span>{{ record.method.toLocaleUpperCase() }}</span>
+        <span>{{ record.method?.toLocaleUpperCase() }}</span>
       </template>
       <template v-if="column.key === 'createTime'">
         <span>{{ dayjs(record.createTime).format("HH:mm:ss") }}</span>

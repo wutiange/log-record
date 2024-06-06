@@ -16,7 +16,7 @@ const finallyLoggers = computed(() => {
 
 const scrollToBottom = () => {
   if (divRef.value && logStore.isScrollToBottom) {
-    divRef.value.scrollTo({top: divRef.value.scrollHeight, behavior: 'smooth'})
+    divRef.value.scrollTo({top: divRef.value.scrollHeight})
   }
 };
 

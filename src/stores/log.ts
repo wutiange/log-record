@@ -22,6 +22,8 @@ export type SearchFilterType = {
   isCaseSensitive: boolean;
 }
 
+const LOGGERS_MAX_SIZE = 100
+
 const useLogStore = defineStore("log", () => {
   const tabIds = ref<{title: string, tabId: string}[]>([])
   const tabOperaHistory = ref<string[]>([])
@@ -39,6 +41,9 @@ const useLogStore = defineStore("log", () => {
     let isUpdated = false
     loggersTabIds.forEach(([tabId, loggers]) => {
       const newLoggers = [...loggers]
+      if (newLoggers.length >= LOGGERS_MAX_SIZE) {
+        newLoggers.shift()
+      }
       const {text = '', isCaseSensitive = false} = searchFilter.value[tabId] ?? {}
       if (!text) {
         newLoggers.push(_logger)
@@ -71,9 +76,14 @@ const useLogStore = defineStore("log", () => {
       formatData: message,
       ...msgObj
     }
+    // 新来的数据会装入所有的会话中
     for (const tabId in allTabLoggers.value) {
       if (Object.prototype.hasOwnProperty.call(allTabLoggers.value, tabId)) {
         const loggers = allTabLoggers.value[tabId];
+        // 限制每个会话的条数最大为 100 条
+        if (loggers.length >= LOGGERS_MAX_SIZE) {
+          loggers.shift()
+        }
         loggers.push({...newLogger})
       }
     }

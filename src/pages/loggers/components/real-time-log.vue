@@ -91,8 +91,16 @@ const wheel = (event: WheelEvent) => {
 }
 
 .log-container::-webkit-scrollbar {
-  display: none;
+  height: 1px;
+  width: 5px;
 }
+
+.log-container::-webkit-scrollbar-thumb {
+  background-color: rgba(51, 102, 102, 1);
+  /* 可根据需要调整颜色 */
+  border-radius: 10px;
+}
+
 
 .list-item:hover {
   background-color: #f5f5f5;

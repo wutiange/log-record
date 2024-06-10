@@ -1,6 +1,8 @@
-import { app, BrowserWindow, globalShortcut, Menu } from "electron";
+import { app, BrowserWindow, autoUpdater, dialog, Menu, MenuItem, ipcMain } from "electron";
 import path from "path";
 import serverClient from './server'
+import { UpdateStatus } from "./config";
+
 
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
@@ -26,11 +28,40 @@ const createWindow = () => {
     icon: path.join(__dirname, '/assets/logo.png')
   });
 
+  const server = 'https://update.electronjs.org'
+  const feed = `${server}/wutiange/log-record/${process.platform}-${process.arch}/${app.getVersion()}`
+
+  autoUpdater.setFeedURL({url: feed})
+
+  autoUpdater.addListener("checking-for-update", () => {
+    mainWindow.webContents.send('update:status', UpdateStatus.CheckingForUpdate)
+  })
+
+  autoUpdater.addListener("update-available", () => {
+    mainWindow.webContents.send('update:status', UpdateStatus.UpdateAvailable)
+  })
+
+  autoUpdater.addListener("update-downloaded", () => {
+    mainWindow.webContents.send('update:status', UpdateStatus.UpdateDownloaded)
+  })
+
+  autoUpdater.addListener("update-not-available", () => {
+    mainWindow.webContents.send('update:status', UpdateStatus.UpdateNotAvailable)
+  })
+
+  
+  ipcMain.handle('checkIsUpdate', () => {
+    if (!MAIN_WINDOW_VITE_DEV_SERVER_URL) {
+      autoUpdater.checkForUpdates()
+    }
+  })
+  ipcMain.handle('toggleDevTools', () => mainWindow.webContents.openDevTools())
 
   // and load the index.html of the app.
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
     mainWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
   } else {
+    autoUpdater.checkForUpdates()
     mainWindow.loadFile(
       path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`)
     );
@@ -44,15 +75,12 @@ const createWindow = () => {
     }
   })
 
-  globalShortcut.register('Alt+F12', () => {
-    // Open the DevTools.
-    mainWindow.webContents.openDevTools();
-  })
-
-  mainWindow.setMenu(null)
+  const menu = new Menu()
+  menu.append(new MenuItem({role: 'toggleDevTools', accelerator: 'Alt+Shift+F12'}))
+  mainWindow.setMenu(menu)
 };
 
-app.on("ready", createWindow);
+app.whenReady().then(createWindow)
 
 app.on("window-all-closed", () => {
   serverClient.stopListen()

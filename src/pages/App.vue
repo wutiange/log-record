@@ -7,6 +7,9 @@ import useNetworkStore from '@/stores/network';
 const logStore = useLogStore();
 const networkStore = useNetworkStore();
 
+window.electronAPI.onUpdateStatusListener((status) => {
+})
+
 window.electronAPI.onGetLogMsg((msg) => {
   logStore.push(msg)
 })

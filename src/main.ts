@@ -10,6 +10,15 @@ if (require("electron-squirrel-startup")) {
   app.quit();
 }
 
+function updateHandle(isDebug = false) {
+  if (process.platform === 'darwin' || isDebug) return
+  const server = 'https://update.electronjs.org'
+  const feed = `${server}/wutiange/log-record/${process.platform}-${process.arch}/${app.getVersion()}`
+
+  autoUpdater.setFeedURL({ url: feed })
+  autoUpdater.checkForUpdates()
+}
+
 const createWindow = () => {
   // Create the browser window.
   const mainWindow = new BrowserWindow({
@@ -27,11 +36,6 @@ const createWindow = () => {
     transparent: true,
     icon: path.join(__dirname, '/assets/logo.png')
   });
-
-  const server = 'https://update.electronjs.org'
-  const feed = `${server}/wutiange/log-record/${process.platform}-${process.arch}/${app.getVersion()}`
-
-  autoUpdater.setFeedURL({url: feed})
 
   autoUpdater.addListener("checking-for-update", () => {
     mainWindow.webContents.send('update:status', UpdateStatus.CheckingForUpdate)
@@ -51,9 +55,7 @@ const createWindow = () => {
 
   
   ipcMain.handle('checkIsUpdate', () => {
-    if (!MAIN_WINDOW_VITE_DEV_SERVER_URL) {
-      autoUpdater.checkForUpdates()
-    }
+    updateHandle(!!MAIN_WINDOW_VITE_DEV_SERVER_URL)
   })
   ipcMain.handle('toggleDevTools', () => mainWindow.webContents.openDevTools())
 
@@ -61,7 +63,7 @@ const createWindow = () => {
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {
     mainWindow.loadURL(MAIN_WINDOW_VITE_DEV_SERVER_URL);
   } else {
-    autoUpdater.checkForUpdates()
+    updateHandle()
     mainWindow.loadFile(
       path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`)
     );

@@ -1,7 +1,7 @@
 {
   "name": "log-record",
   "productName": "log-record",
-  "version": "1.0.3",
+  "version": "1.0.5",
   "description": "My Electron application description",
   "main": ".vite/build/main.js",
   "scripts": {

@@ -3,6 +3,8 @@ import useNetworkStore from '@/stores/network';
 import { storeToRefs } from 'pinia';
 import dayjs from 'dayjs'
 import { computed, watch } from 'vue';
+import VueJsonPretty from 'vue-json-pretty'
+import 'vue-json-pretty/lib/styles.css'
 
 const networkStore = useNetworkStore();
 
@@ -14,18 +16,28 @@ const getBody = (source: string, headers: Record<string, any> = {}) => {
     const [key, value] = headersArr[i];
     const lowerKey = key.toLocaleLowerCase()
     if (lowerKey === 'content-type' && value.includes('application/json')) {
-      return JSON.stringify(JSON.parse(source), null, 2)
+      return JSON.parse(source)
     }
   }
   return source
 }
 
 const reqBody = computed(() => {
-  return getBody(csn.value.reqBody, csn.value.reqHeaders)
+  try {
+    return JSON.parse(csn.value.reqBody)
+  } catch (error) {
+    console.warn('解析响应体失败', error)
+    return csn.value.reqBody
+  }
 })
 
 const resBody = computed(() => {
-  return getBody(csn.value.resBody, csn.value.resHeaders)
+  try {
+    return JSON.parse(csn.value.resBody)
+  } catch (error) {
+    console.warn('解析响应体失败', error)
+    return csn.value.resBody
+  }
 })
 
 </script>
@@ -52,7 +64,8 @@ const resBody = computed(() => {
     </div>
     <div class="strip">
       <span class="label-item">请求体：</span>
-      <highlightjs v-if="csn.reqBody" autodetect :code="reqBody" />
+      <vue-json-pretty v-if="csn.reqBody" :data="reqBody" :deep="2" :show-double-quotes="true"
+          showLength show-icon :collapsed-on-click-brackets="true" />
       <span v-else>空</span>
     </div>
     <div class="br" />
@@ -77,7 +90,8 @@ const resBody = computed(() => {
       </div>
       <div class="strip">
         <span class="label-item">响应体：</span>
-        <highlightjs v-if="csn.resBody" class="highlight" autodetect :code="resBody" />
+        <vue-json-pretty v-if="csn.resBody" :data="resBody" :deep="2" :show-double-quotes="true"
+          showLength show-icon :collapsed-on-click-brackets="true" />
         <span v-else>空</span>
       </div>
     </template>
@@ -89,6 +103,7 @@ const resBody = computed(() => {
   flex-direction: column;
   gap: 10px;
   overflow-y: hidden;
+  color: black;
 }
 
 .strip {
@@ -134,7 +149,7 @@ const resBody = computed(() => {
 
 .br {
   width: 100%;
-  height: 2px;
+  height: 1px;
   background-color: #ccc;
 }
 

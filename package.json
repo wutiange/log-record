@@ -1,7 +1,7 @@
 {
   "name": "log-record",
   "productName": "log-record",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "My Electron application description",
   "main": ".vite/build/main.js",
   "scripts": {
@@ -9,9 +9,7 @@
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
-    "lint": "eslint --ext .ts,.tsx .",
-    "sign-dev-electron-app": "codesign --deep --force --verbose --sign - node_modules/electron/dist/Electron.app",
-    "postinstall": "yarn sign-dev-electron-app"
+    "lint": "eslint --ext .ts,.tsx ."
   },
   "keywords": [],
   "author": {
@@ -57,6 +55,7 @@
     "highlight.js": "^11.9.0",
     "pinia": "^2.1.7",
     "vue": "^3.4.3",
+    "vue-json-pretty": "^2.4.0",
     "vue-router": "^4.2.5"
   }
 }

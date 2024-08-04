@@ -2,13 +2,14 @@
 import { computed, nextTick, ref, watch } from 'vue';
 import useLogStore from '@/stores/log';
 import type { LogType } from '@/stores/log';
-import { ArrowRightOutlined } from '@ant-design/icons-vue';
 import dayjs from 'dayjs'
+import VueJsonPretty from 'vue-json-pretty'
+import 'vue-json-pretty/lib/styles.css'
 const divRef = ref<HTMLDivElement | null>(null);
 const logStore = useLogStore();
 const mouseScrollHeight = ref(0);
 const timer = ref<NodeJS.Timeout>();
-const props = defineProps<{tabId: string}>()
+const props = defineProps<{ tabId: string }>()
 
 const finallyLoggers = computed(() => {
   return logStore.currentFilterResults[props.tabId] ?? []
@@ -16,7 +17,7 @@ const finallyLoggers = computed(() => {
 
 const scrollToBottom = () => {
   if (divRef.value && logStore.isScrollToBottom) {
-    divRef.value.scrollTo({top: divRef.value.scrollHeight})
+    divRef.value.scrollTo({ top: divRef.value.scrollHeight })
   }
 };
 
@@ -62,24 +63,32 @@ const wheel = (event: WheelEvent) => {
     mouseScrollHeight.value = 0;
   }, 200);
 };
+
+const texts = (text: string) => {
+  return text.split(' ')
+}
+
+const getText = (text: string) => {
+  try {
+    return JSON.parse(text)
+  } catch (error) {
+    console.warn(error, text)
+    return text
+  }
+}
 </script>
 
 <template>
   <div class="log-container" ref="divRef" @scroll="scroll" @wheel="wheel">
-    <a-list size="large" :data-source="finallyLoggers" :bordered="false">
-      <template #renderItem="{ item }">
-        <a-list-item
-          @click="onClickItem(item)"
-          class="list-item"
-          :class="logStore.currentItem?.id === item.id && 'select-back'"
-        >
-          <div :class="`log-level-sign ${item.level}`" />
-          <a-tag color="default">{{ dayjs(item.createTime).format("HH:mm:ss") }}</a-tag>
-          <span class="header-text" v-html="item.text" />
-          <arrow-right-outlined class="right-outlined" />
-        </a-list-item>
-      </template>
-    </a-list>
+    <div v-for="item in finallyLoggers" class="item-box">
+      <div :class="`log-level-sign ${item.level}`" />
+      <a-tag color="default" class="tag-box">{{ dayjs(item.createTime).format("HH:mm:ss") }}</a-tag>
+
+      <div class="msg-text">
+        <vue-json-pretty v-for="text in item.formatData" :data="text" :deep="1" :show-double-quotes="true"
+        showLength :collapsedNodeLength="1" :showIcon="!['string', 'number', 'null', 'undefined', 'boolean'].includes(typeof text)" :collapsed-on-click-brackets="true" />
+      </div>
+    </div>
   </div>
 </template>
 
@@ -88,6 +97,9 @@ const wheel = (event: WheelEvent) => {
   overflow-y: auto;
   margin-bottom: 10px;
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px
 }
 
 .log-container::-webkit-scrollbar {
@@ -117,6 +129,9 @@ const wheel = (event: WheelEvent) => {
   margin-right: 5px;
   flex-shrink: 0;
 }
+.tag-box {
+  align-self: flex-start;
+}
 
 .log {
   background-color: #1677ff;
@@ -131,10 +146,25 @@ const wheel = (event: WheelEvent) => {
 }
 
 .header-text {
-  white-space: nowrap;
   overflow-x: scroll;
   cursor: auto;
   margin-right: auto;
+}
+
+.item-box {
+  display: flex;
+  flex-direction: row;
+  padding: 10px 0;
+}
+
+.msg-text {
+  margin-right: auto;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  align-self: center;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
 .header-text::-webkit-scrollbar {
@@ -151,7 +181,4 @@ const wheel = (event: WheelEvent) => {
   background-color: rgba(0, 0, 0, 0.5);
 }
 
-.right-outlined {
-  margin-left: 10px;
-}
 </style>

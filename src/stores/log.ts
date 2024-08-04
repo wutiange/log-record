@@ -22,7 +22,7 @@ export type SearchFilterType = {
   isCaseSensitive: boolean;
 }
 
-const LOGGERS_MAX_SIZE = 1000
+const LOGGERS_MAX_SIZE = 10000
 
 const useLogStore = defineStore("log", () => {
   const tabIds = ref<{title: string, tabId: string}[]>([])
@@ -65,7 +65,7 @@ const useLogStore = defineStore("log", () => {
   }
 
   const push = (msg: Record<string, any>) => {
-    const { message, ...msgObj } = (msg ?? {}) as any
+    const { message, ...msgObj } = (msg ?? {}) as any;
     const newLogger = {
       text: message.map((e: any) => {
         if (typeof e === 'string') {

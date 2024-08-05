@@ -1,14 +1,13 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue';
 import useLogStore from '@/stores/log';
-import type { LogType } from '@/stores/log';
 import dayjs from 'dayjs'
 import VueJsonPretty from 'vue-json-pretty'
 import 'vue-json-pretty/lib/styles.css'
-const divRef = ref<HTMLDivElement | null>(null);
+// @ts-ignore
+import { RecycleScroller as RecycleScrollerType } from 'vue-virtual-scroller'
+const divRef = ref<RecycleScrollerType | null>(null);
 const logStore = useLogStore();
-const mouseScrollHeight = ref(0);
-const timer = ref<NodeJS.Timeout>();
 const props = defineProps<{ tabId: string }>()
 
 const finallyLoggers = computed(() => {
@@ -17,7 +16,7 @@ const finallyLoggers = computed(() => {
 
 const scrollToBottom = () => {
   if (divRef.value && logStore.isScrollToBottom) {
-    divRef.value.scrollTo({ top: divRef.value.scrollHeight })
+    divRef.value.scrollToItem(finallyLoggers.value.length - 1)
   }
 };
 
@@ -29,67 +28,42 @@ watch(() => logStore.isScrollToBottom, () => {
   nextTick(scrollToBottom);
 });
 
-const onClickItem = (item: LogType) => {
-  timer.value && clearTimeout(timer.value);
-  const selectedText = window.getSelection()?.toString();
-  if (selectedText?.length) return;
-  timer.value = setTimeout(() => {
-    logStore.setTabIsScrollToBottomByTabId(false);
-    logStore.updateCurrentItem(item);
-    timer.value && clearTimeout(timer.value);
-  }, 200);
-};
 const scroll = () => {
-  if (divRef.value) {
-    const scrollTop = divRef.value.scrollTop;
-    const clientHeight = divRef.value.clientHeight;
-    const scrollHeight = divRef.value.scrollHeight;
-    if (scrollTop + clientHeight >= scrollHeight) {
-      logStore.setTabIsScrollToBottomByTabId(true);
-    }
-  }
 };
-const wheel = (event: WheelEvent) => {
-  const deltaY = event.deltaY;
-  mouseScrollHeight.value += deltaY;
-  let timer: ReturnType<typeof setTimeout> | undefined;
-  if (timer) {
-    clearTimeout(timer);
-  }
-  timer = setTimeout(() => {
-    if (mouseScrollHeight.value < -40) {
-      logStore.setTabIsScrollToBottomByTabId(false);
-    }
-    mouseScrollHeight.value = 0;
-  }, 200);
+const wheel = () => {
+  logStore.setTabIsScrollToBottomByTabId(false);
 };
 
-const texts = (text: string) => {
-  return text.split(' ')
-}
 
-const getText = (text: string) => {
+const parseText = (text: string) => {
   try {
-    return JSON.parse(text)
+    return JSON.parse(text);
   } catch (error) {
-    console.warn(error, text)
-    return text
+    return text;
   }
 }
+
 </script>
 
 <template>
-  <div class="log-container" ref="divRef" @scroll="scroll" @wheel="wheel">
-    <div v-for="item in finallyLoggers" class="item-box">
-      <div :class="`log-level-sign ${item.level}`" />
-      <a-tag color="default" class="tag-box">{{ dayjs(item.createTime).format("HH:mm:ss") }}</a-tag>
+  <DynamicScroller :items="finallyLoggers" :min-item-size="54" class="log-container" ref="divRef" @scroll="scroll"
+    @wheel="wheel">
+    <template v-slot="{ item, index, active }">
+      <DynamicScrollerItem :item="item" :active="active" :size-dependencies="[
+        item.formatData,
+      ]" :data-index="index" class="item-box">
+        <div :class="`log-level-sign ${item.level}`" />
+        <a-tag color="default" class="tag-box">{{ dayjs(item.createTime).format("HH:mm:ss.SSS") }}</a-tag>
 
-      <div class="msg-text">
-        <vue-json-pretty v-for="text in item.formatData" :data="text" :deep="1" :show-double-quotes="true"
-        showLength :collapsedNodeLength="1" :showIcon="!['string', 'number', 'null', 'undefined', 'boolean'].includes(typeof text)" :collapsed-on-click-brackets="true" />
-      </div>
-    </div>
-  </div>
+        <div class="msg-text">
+          <vue-json-pretty v-for="text in item.formatData" :data="parseText(text)" :deep="1" :show-double-quotes="true"
+            showLength :collapsedNodeLength="1"
+            :showIcon="!['string', 'number', 'null', 'undefined', 'boolean'].includes(typeof text)"
+            :collapsed-on-click-brackets="true" />
+        </div>
+      </DynamicScrollerItem>
+    </template>
+  </DynamicScroller>
 </template>
 
 <style scoped>
@@ -99,18 +73,20 @@ const getText = (text: string) => {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 5px
 }
 
 .log-container::-webkit-scrollbar {
   height: 1px;
-  width: 5px;
+  width: 8px;
 }
 
 .log-container::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 4px;
+}
+
+.log-container::-webkit-scrollbar-thumb:hover {
   background-color: rgba(51, 102, 102, 1);
-  /* 可根据需要调整颜色 */
-  border-radius: 10px;
 }
 
 
@@ -129,6 +105,7 @@ const getText = (text: string) => {
   margin-right: 5px;
   flex-shrink: 0;
 }
+
 .tag-box {
   align-self: flex-start;
 }
@@ -154,7 +131,7 @@ const getText = (text: string) => {
 .item-box {
   display: flex;
   flex-direction: row;
-  padding: 10px 0;
+  padding: 8px 0;
 }
 
 .msg-text {
@@ -165,20 +142,6 @@ const getText = (text: string) => {
   align-self: center;
   gap: 10px;
   flex-wrap: wrap;
-}
-
-.header-text::-webkit-scrollbar {
-  height: 3px;
-}
-
-.header-text::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 0, 0, 0.1);
-  /* 可根据需要调整颜色 */
-  border-radius: 10px;
-}
-
-.header-text::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(0, 0, 0, 0.5);
 }
 
 </style>

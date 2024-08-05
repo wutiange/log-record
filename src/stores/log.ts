@@ -42,7 +42,7 @@ const useLogStore = defineStore("log", () => {
     loggersTabIds.forEach(([tabId, loggers]) => {
       let newLoggers = [...loggers]
       if (newLoggers.length >= LOGGERS_MAX_SIZE) {
-        newLoggers = newLoggers.slice(0, newLoggers.length - 100)
+        newLoggers = newLoggers.slice(0, newLoggers.length - 1000)
       }
       const {text = '', isCaseSensitive = false} = searchFilter.value[tabId] ?? {}
       if (!text) {
@@ -79,10 +79,7 @@ const useLogStore = defineStore("log", () => {
     // 新来的数据会装入所有的会话中
     for (const tabId in allTabLoggers.value) {
       if (Object.prototype.hasOwnProperty.call(allTabLoggers.value, tabId)) {
-        let loggers = allTabLoggers.value[tabId];
-        if (loggers.length >= LOGGERS_MAX_SIZE) {
-          loggers = loggers.slice(0, loggers.length - 100)
-        }
+        const loggers = allTabLoggers.value[tabId];
         loggers.push({...newLogger})
       }
     }

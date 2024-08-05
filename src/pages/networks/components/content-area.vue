@@ -5,22 +5,11 @@ import dayjs from 'dayjs'
 import { computed, watch } from 'vue';
 import VueJsonPretty from 'vue-json-pretty'
 import 'vue-json-pretty/lib/styles.css'
-
+import { message } from 'ant-design-vue';
+const [messageApi, contextHolder] = message.useMessage();
 const networkStore = useNetworkStore();
 
 const { currentSelectNetwork: csn } = storeToRefs(networkStore)
-
-const getBody = (source: string, headers: Record<string, any> = {}) => {
-  const headersArr = Object.entries(headers)
-  for (let i = 0; i < headersArr.length; i++) {
-    const [key, value] = headersArr[i];
-    const lowerKey = key.toLocaleLowerCase()
-    if (lowerKey === 'content-type' && value.includes('application/json')) {
-      return JSON.parse(source)
-    }
-  }
-  return source
-}
 
 const reqBody = computed(() => {
   try {
@@ -40,10 +29,21 @@ const resBody = computed(() => {
   }
 })
 
+const copyText = async (text: any) => {
+  try {
+    await navigator.clipboard.writeText(typeof text === 'object' ? JSON.stringify(text) : text);
+    messageApi.info('复制成功');
+  } catch (err) {
+    messageApi.warning('复制失败');
+    console.error('无法复制文本: ', err);
+  }
+};
+
 </script>
 
 <template v-if="url">
   <div class="format-text">
+    <contextHolder />
     <div class="strip">
       <span class="label-item">请求地址：</span>
       <span>{{ csn.url }}</span>
@@ -64,9 +64,10 @@ const resBody = computed(() => {
     </div>
     <div class="strip">
       <span class="label-item">请求体：</span>
-      <vue-json-pretty v-if="csn.reqBody" :data="reqBody" :deep="2" :show-double-quotes="true"
-          showLength show-icon :collapsed-on-click-brackets="true" />
+      <vue-json-pretty v-if="csn.reqBody" :data="reqBody" :deep="2" :show-double-quotes="true" showLength show-icon
+        :collapsed-on-click-brackets="true" />
       <span v-else>空</span>
+      <span v-if="csn.reqBody" class="copy" @click="copyText(reqBody)">复制</span>
     </div>
     <div class="br" />
     <template v-if="csn.statusCode">
@@ -90,9 +91,10 @@ const resBody = computed(() => {
       </div>
       <div class="strip">
         <span class="label-item">响应体：</span>
-        <vue-json-pretty v-if="csn.resBody" :data="resBody" :deep="2" :show-double-quotes="true"
-          showLength show-icon :collapsed-on-click-brackets="true" />
+        <vue-json-pretty v-if="csn.resBody" :data="resBody" :deep="2" :show-double-quotes="true" showLength show-icon
+          :collapsed-on-click-brackets="true" />
         <span v-else>空</span>
+        <span v-if="csn.resBody" class="copy" @click="copyText(resBody)">复制</span>
       </div>
     </template>
   </div>
@@ -110,6 +112,7 @@ const resBody = computed(() => {
   display: flex;
   flex-direction: row;
   align-items: flex-start;
+  position: relative;
 }
 
 .label-item {
@@ -156,5 +159,12 @@ const resBody = computed(() => {
 .highlight {
   flex: 1;
   border-radius: 5px;
+}
+
+.copy {
+  position: absolute;
+  right: 0;
+  top: 0;
+  cursor: pointer;
 }
 </style>

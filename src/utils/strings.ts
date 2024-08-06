@@ -41,8 +41,3 @@ export function replaceSubstring (
   // 使用slice获取起始部分和结束部分，然后将它们与替换字符串拼接
   return str.slice(0, index) + replacement + str.slice(index + length);
 }
-
-
-export function swapTextToMark(text: string) {
-  return `<span style="background-color: #cccc99; color: #666666;">${text}</span>`;
-}

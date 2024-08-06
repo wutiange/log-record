@@ -3,7 +3,6 @@ import {
   convertAndSortRecord,
   findAllSubstringIndices,
   replaceSubstring,
-  swapTextToMark,
 } from "./strings";
 
 export type ColorOrTextType = {
@@ -106,7 +105,7 @@ export function handleTextCommand(
         logger.text,
         index,
         size,
-        swapTextToMark(replacement)
+        replacement
       );
     }
 

@@ -18,6 +18,7 @@ const createWindow = () => {
     },
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
+      spellcheck: false,
     },
     transparent: true,
     icon: path.join(__dirname, '/assets/logo.png')

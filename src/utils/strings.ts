@@ -41,3 +41,30 @@ export function replaceSubstring (
   // 使用slice获取起始部分和结束部分，然后将它们与替换字符串拼接
   return str.slice(0, index) + replacement + str.slice(index + length);
 }
+
+
+export function trimQuotesAndUnescape(input: string): string {
+  // 处理双引号的情况
+  if (input.startsWith('"') && input.endsWith('"')) {
+    return input.slice(1, -1);
+  }
+  
+  // 处理单引号的情况
+  if (input.startsWith("'") && input.endsWith("'")) {
+    return input.slice(1, -1);
+  }
+  
+  // 处理转义双引号的情况
+  if (input.startsWith('\\"') && input.endsWith('\\"')) {
+    return '"' + input.slice(2, -2) + '"';
+  }
+  
+  // 处理转义单引号的情况
+  if (input.startsWith("\\'") && input.endsWith("\\'")) {
+    return "'" + input.slice(2, -2) + "'";
+  }
+  
+  // 其他情况保持不变
+  return input;
+}
+

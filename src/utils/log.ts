@@ -3,6 +3,7 @@ import {
   convertAndSortRecord,
   findAllSubstringIndices,
   replaceSubstring,
+  trimQuotesAndUnescape,
 } from "./strings";
 
 export type ColorOrTextType = {
@@ -33,7 +34,7 @@ export const getColorAndText = (level: LevelType) => {
 export function searchTextToCommandsMap(
   searchText: string
 ): Map<string, string[]> {
-  const commandObj = new Map();
+  const commandObj = new Map<string, string[]>();
   if (!searchText) {
     return commandObj;
   }
@@ -50,13 +51,13 @@ export function searchTextToCommandsMap(
       if (commandArr[1]?.length) {
         const value = commandObj.get(command) ?? [];
         value.push(commandArr[1]);
-        commandObj.set(command, value);
+        commandObj.set(command, value.map(e => trimQuotesAndUnescape(e)));
       }
     } else {
       // 说明是普通文本，普通文本要将 文本 按照 text:文本 来处理
       const value = commandObj.get("text") ?? [];
       value.push(e);
-      commandObj.set("text", value);
+      commandObj.set("text", value.map(e => trimQuotesAndUnescape(e)));
     }
   }
   return commandObj;

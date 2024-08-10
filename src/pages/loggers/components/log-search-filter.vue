@@ -3,40 +3,11 @@ import useLogStore from '../../../stores/log';
 import { onMounted, onUnmounted, reactive, ref, watch } from 'vue';
 
 
-const searchContent = ref('');
 const logStore = useLogStore();
 const filters = reactive({ isCaseSensitive: false });
 const timer = ref<NodeJS.Timeout | null>(null)
 const props = defineProps<{ tabId: string }>()
 
-const onSearch = () => {
-  logStore.updateSearchFilterByTabId(props.tabId, {
-    text: searchContent.value,
-    isCaseSensitive: filters.isCaseSensitive
-  })
-}
-
-const onSwapCaseSensitivity = () => {
-  filters.isCaseSensitive = !filters.isCaseSensitive
-  onSearch()
-}
-
-const clearTimer = () => {
-  if (timer.value) {
-    clearTimeout(timer.value)
-  }
-}
-
-watch(searchContent, (val) => {
-  clearTimer()
-  if (!val) {
-    onSearch();
-  } else {
-    timer.value = setTimeout(onSearch, 500)
-  }
-});
-
-onUnmounted(clearTimer)
 
 const searchText = ref('')
 const contentDiv = ref<HTMLElement | null>(null)
@@ -45,7 +16,6 @@ const textArea = ref<HTMLTextAreaElement | null>(null)
 
 const resizeObserver = new ResizeObserver(entries => {
   for (let entry of entries) {
-    console.log(entry.target, '----entry.target---', entry.contentRect.height)
     if (entry.target === contentDiv.value && textArea.value) {
       textArea.value.style.height = `${entry.contentRect.height}px`;
     }
@@ -69,7 +39,6 @@ function processString(input: string): (string | string[])[] {
 watch(searchText, () => {
   // 将字符串处理成数组，如：123:234 sdd a:123 得到的结果为：[[123, 234], sdd, [a, 123]]
   const result = processString(searchText.value)
-  console.log(result, '---result---')
   contentDiv.value.innerHTML = result.map(item => {
     if (Array.isArray(item)) {
       return `<span class="group-text">${item[0]}:<span class="group-value">${item[1]}</span></span>`;
@@ -80,11 +49,52 @@ watch(searchText, () => {
 
 })
 
+const onSearch = () => {
+  logStore.updateSearchFilterByTabId(props.tabId, {
+    text: searchText.value,
+    isCaseSensitive: filters.isCaseSensitive
+  })
+}
+
+const onSwapCaseSensitivity = () => {
+  filters.isCaseSensitive = !filters.isCaseSensitive
+  onSearch()
+}
+
+const clearTimer = () => {
+  if (timer.value) {
+    clearTimeout(timer.value)
+  }
+}
+
+watch(searchText, (val) => {
+  clearTimer()
+  if (!val) {
+    onSearch();
+  } else {
+    timer.value = setTimeout(onSearch, 500)
+  }
+});
+
+onUnmounted(clearTimer)
+
 onMounted(() => {
   if (contentDiv.value) {
     resizeObserver.observe(contentDiv.value);
   }
+  if (textArea.value) {
+    textArea.value.addEventListener("keydown", (event) => {
+      if (event.key === 'Enter' && !event.shiftKey) {
+        onSearch()
+      }
+      event.preventDefault(); // 阻止默认的换行行为
+    })
+  }
 });
+
+onUnmounted(() => {
+  resizeObserver.disconnect();
+})
 
 </script>
 
@@ -93,24 +103,20 @@ onMounted(() => {
     <div class="input-container">
 
       <div class="input-box">
-        <div class="input-content" ref="contentDiv" :spellcheck="false"></div>
-        <!-- <input ref="inputRef" v-model="searchText" class="input-item" > -->
+        <div class="input-content" ref="contentDiv" :spellcheck="false" />
         <textarea ref="textArea" v-model="searchText" placeholder="请输入搜索内容" class="input-item"></textarea>
       </div>
     </div>
-    <!-- <a-input class="search" @pressEnter="onSearch" v-model:value="searchContent" placeholder="请输入搜索内容" allow-clear />
-
     <a-tooltip>
       <template #title>忽略大小写</template>
-<div :class="{
+      <div :class="{
         'case-sensitivity-container': true,
         'case-sensitivity-container-selected': filters.isCaseSensitive,
       }" @click="onSwapCaseSensitivity">
-  <img src="../../../assets/images/case-sensitivity.svg"
-    :class="{ 'case-sensitivity': true, 'selected-case-sensitivity': filters.isCaseSensitive }" alt="" />
-</div>
-
-</a-tooltip> -->
+        <img src="../../../assets/images/case-sensitivity.svg"
+          :class="{ 'case-sensitivity': true, 'selected-case-sensitivity': filters.isCaseSensitive }" alt="" />
+      </div>
+    </a-tooltip>
   </div>
 </template>
 
@@ -122,11 +128,6 @@ onMounted(() => {
   margin: 0 10px 10px 10px;
   gap: 10px;
   width: 50%;
-}
-
-.search {
-  flex: 1;
-  font-size: 15px;
 }
 
 .case-sensitivity-container {
@@ -214,7 +215,6 @@ onMounted(() => {
   border: 1px solid rgba(60, 116, 221, 0.5);
   margin-left: -2px;
   padding: 0px;
-  border-radius: 3px;
 }
 
 .group-value {

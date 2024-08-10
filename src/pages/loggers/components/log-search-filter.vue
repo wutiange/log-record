@@ -1,17 +1,25 @@
 <script setup lang="ts">
 import useLogStore from '../../../stores/log';
-import { onMounted, onUnmounted, reactive, ref, watch } from 'vue';
+import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
 
 
 const logStore = useLogStore();
 const filters = reactive({ isCaseSensitive: false });
 const timer = ref<NodeJS.Timeout | null>(null)
 const props = defineProps<{ tabId: string }>()
-
-
 const searchText = ref('')
 const contentDiv = ref<HTMLElement | null>(null)
 const textArea = ref<HTMLTextAreaElement | null>(null)
+const isFocus = ref(false)
+const command = ref<string | null>(null)
+
+const onFocus = () => {
+  isFocus.value = true;
+
+}
+const onBlur = () => {
+  isFocus.value = false;
+}
 
 
 const resizeObserver = new ResizeObserver(entries => {
@@ -46,7 +54,13 @@ watch(searchText, () => {
       return item;
     }
   }).join(' ');
-
+  const size = searchText.value.length;
+  if (searchText.value[size - 1] === ":") {
+    const lastSpaceIndex = searchText.value.lastIndexOf(" ")
+    command.value = searchText.value.substring(lastSpaceIndex + 1, size - 1)
+  } else {
+    command.value = null
+  }
 })
 
 const onSearch = () => {
@@ -67,7 +81,6 @@ const clearTimer = () => {
     clearTimeout(timer.value)
   }
 }
-
 watch(searchText, (val) => {
   clearTimer()
   if (!val) {
@@ -76,6 +89,20 @@ watch(searchText, (val) => {
     timer.value = setTimeout(onSearch, 500)
   }
 });
+
+
+const onTag = (key: string) => {
+  const size = searchText.value.length;
+  if (searchText.value[size] === ' ') {
+    searchText.value += `${key}:`
+  } else {
+    searchText.value += ` ${key}:`
+  }
+}
+
+const onTagValue = (val: string) => {
+  searchText.value += `"${val}" `
+}
 
 onUnmounted(clearTimer)
 
@@ -104,10 +131,26 @@ onUnmounted(() => {
 <template>
   <div class="search-container">
     <div class="input-container">
-
-      <div class="input-box">
+      <div :class="{ 'input-box': true, 'input-box-focus': isFocus }">
         <div class="input-content" ref="contentDiv" :spellcheck="false" />
-        <textarea ref="textArea" v-model="searchText" placeholder="请输入搜索内容" class="input-item"></textarea>
+        <textarea ref="textArea" v-on:blur="onBlur" v-on:focus="onFocus" v-model="searchText" placeholder="请输入搜索内容"
+          class="input-item"></textarea>
+      </div>
+      <div class="tip-box" v-if="isFocus" @mousedown.prevent>
+        <div class="label-box">
+          <template v-if="command === null">
+            <span class="title-box">标签</span>
+            <div class="tag-container">
+              <span class="tag-text" v-for="key in Object.keys(logStore.keyValues)" @click="onTag(key)">{{ key }}</span>
+            </div>
+          </template>
+          <template v-if="command">
+            <span class="title-box">标签（{{command}}）对应的值</span>
+            <div class="tag-container">
+              <span class="tag-text" v-for="value of logStore.keyValues[command]" @click="onTagValue(value)">{{ value }}</span>
+            </div>
+          </template>
+        </div>
       </div>
     </div>
     <a-tooltip>
@@ -163,9 +206,13 @@ onUnmounted(() => {
   width: 100%;
   align-items: center;
   position: relative;
-  border: 1px solid #ccc;
+  box-shadow: rgba(0, 0, 0, 0.2) 0px 0px 10px;
   border-radius: 5px;
   padding: 8px 10px;
+}
+
+.input-box-focus {
+  box-shadow: rgba(51, 102, 102, 0.8) 0px 0px 10px;
 }
 
 .input-item {
@@ -222,5 +269,45 @@ onUnmounted(() => {
 
 .group-value {
   color: #3C74DD;
+}
+
+.tip-box {
+  position: absolute;
+  width: 50%;
+  background-color: #fff;
+  border-radius: 8px;
+  z-index: 99;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-shadow: rgba(0, 0, 0, 0.2) 0px 0px 10px;
+  padding-bottom: 10px;
+  top: 50px;
+}
+
+.label-box {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.title-box {
+  background-color: #f5f5f5;
+  padding: 10px;
+}
+
+.tag-container {
+  margin-left: 20px;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+}
+
+.tag-text {
+  cursor: pointer;
+  padding: 2px 5px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
 }
 </style>

@@ -50,6 +50,7 @@ watch(searchText, () => {
 })
 
 const onSearch = () => {
+  console.log(logStore.keyValues)
   logStore.updateSearchFilterByTabId(props.tabId, {
     text: searchText.value,
     isCaseSensitive: filters.isCaseSensitive
@@ -87,7 +88,9 @@ onMounted(() => {
       if (event.key === 'Enter' && !event.shiftKey) {
         onSearch()
       }
-      event.preventDefault(); // 阻止默认的换行行为
+      if (event.key === 'Enter') {
+        event.preventDefault(); // 阻止默认的换行行为
+      }
     })
   }
 });

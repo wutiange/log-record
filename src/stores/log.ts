@@ -33,6 +33,7 @@ const useLogStore = defineStore("log", () => {
   const allTabLoggers = ref<Record<string, LogType[]>>({})
   const currentFilterResults = ref<Record<string, LogType[]>>({})
   const searchFilter = ref<Record<string, SearchFilterType>>({})
+  const keyValues = ref<Record<string, string[]>>({}) // 所有的key和对应的值，像 level version brand
 
   const updateAllTabSingleLogger = (_logger: LogType) => {
     const oldCurrentFilterResults = currentFilterResults.value;
@@ -64,6 +65,27 @@ const useLogStore = defineStore("log", () => {
     }
   }
 
+  const handleKeyValues = async (msg: Record<string, any>): Promise<void> => {
+    const fields = [
+      "env", "version", "brand", "model", "systemName", "tag", "level"
+    ];
+  
+    const updatePromises = fields.map(field => 
+      Promise.resolve().then(() => {
+        if (msg[field] !== undefined) {
+          const values = keyValues.value[field] ?? [];
+          if (!values.includes(msg[field])) {
+            values.push(msg[field]);
+            keyValues.value[field] = values;
+          }
+        }
+      })
+    );
+  
+    await Promise.all(updatePromises);
+  };
+  
+
   const push = (msg: Record<string, any>) => {
     const { message, ...msgObj } = (msg ?? {}) as any;
     const newLogger = {
@@ -76,6 +98,7 @@ const useLogStore = defineStore("log", () => {
       formatData: message,
       ...msgObj
     }
+    handleKeyValues(msg)
     // 新来的数据会装入所有的会话中
     for (const tabId in allTabLoggers.value) {
       if (Object.prototype.hasOwnProperty.call(allTabLoggers.value, tabId)) {
@@ -195,7 +218,8 @@ const useLogStore = defineStore("log", () => {
     removeID,
     swapCurrentShowTabId,
     updateTabOperaHistory,
-    tabIds
+    tabIds,
+    keyValues
   };
 });
 

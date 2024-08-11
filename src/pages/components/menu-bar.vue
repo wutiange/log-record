@@ -1,9 +1,12 @@
 <script setup lang="ts">
-import { reactive } from 'vue';
+import { reactive, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import {SettingOutlined} from '@ant-design/icons-vue'
-import {version} from '../../../package.json'
+import { SettingOutlined } from '@ant-design/icons-vue'
+import { version } from '../../../package.json'
+import useAppStore from '@/stores/app';
 const router = useRouter()
+const appStore = useAppStore()
+const openUpdate = ref(false)
 const funcs = reactive([
   // @ts-ignore
   { img: new URL('../../assets/images/log.svg', import.meta.url).href, path: '/log', text: '日志' },
@@ -27,8 +30,25 @@ const toggleDevTools = () => {
   window.electronAPI.toggleDevTools()
 }
 
-const checkIsUpdate = () => {
-  window.electronAPI.checkIsUpdate()
+const checkIsUpdate = async () => {
+  await appStore.updateCheck()
+  if (appStore.updateResult?.hasUpgrade) {
+    openUpdate.value = true
+  }
+}
+
+watch(() => appStore.updateResult.hasUpgrade, () => {
+  console.log(appStore.updateResult)
+  if (appStore.updateResult.hasUpgrade) {
+    openUpdate.value = true
+  }
+})
+
+const onUpdate = () => {
+  if (!appStore.updateResult?.releaseDetails?.html_url) {
+    return
+  }
+  window.electronAPI.openUrl(appStore.updateResult.releaseDetails.html_url)
 }
 </script>
 
@@ -50,13 +70,20 @@ const checkIsUpdate = () => {
         <p>
           <a-button @click="toggleDevTools" type="text">调试器（Alt + Shift + F12）</a-button>
         </p>
-        <p>
-          <a-button @click="checkIsUpdate" type="text">检查更新</a-button>
-        </p>
-        <p class="version" type="text">版本号：v{{ version }}</p>
+        <a-button @click="checkIsUpdate" type="text">检查更新</a-button>
+        <p class="version" type="text">版本号：v{{ version }}<span class="have-update-text"
+            v-if="appStore.updateResult.hasUpgrade">-->{{ appStore.updateResult.latestVersion ?? '' }}</span></p>
       </template>
-      <SettingOutlined class="setting-icon" />
+      <a-badge :dot="appStore.updateResult.hasUpgrade">
+        <SettingOutlined class="setting-icon" />
+      </a-badge>
     </a-popover>
+    <a-modal v-model:open="openUpdate" title="更新内容" ok-text="去下载" cancel-text="取消" @ok="onUpdate">
+      <p class="dialog-version">最新版本号：v{{ appStore.updateResult.latestVersion }}</p>
+      <div>
+        更新内容：<p class="update-content">{{ appStore.updateResult?.releaseDetails?.body ?? '' }}</p>
+      </div>
+    </a-modal>
   </div>
 </template>
 
@@ -107,5 +134,21 @@ const checkIsUpdate = () => {
 
 p {
   margin-bottom: 0;
+}
+
+.have-update-text {
+  color: red;
+}
+
+.update-content {
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  /* 兼容旧浏览器 */
+}
+
+.dialog-version {
+  margin-top: 20px;
+  margin-bottom: 5px;
 }
 </style>

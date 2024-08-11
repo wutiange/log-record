@@ -1,6 +1,8 @@
-import { app, BrowserWindow, Menu, MenuItem, ipcMain } from "electron";
+import { app, BrowserWindow, Menu, MenuItem, ipcMain, shell } from "electron";
 import path from "path";
 import serverClient from './server'
+import { checkForUpgrade } from "./utils/update";
+import {name, author, version} from '../package.json'
 
 
 
@@ -26,6 +28,12 @@ const createWindow = () => {
 
   
   ipcMain.handle('toggleDevTools', () => mainWindow.webContents.openDevTools())
+  ipcMain.handle('checkIsUpdate', () => checkForUpgrade(author.name, name, version))
+
+  ipcMain.on('openUrl', (_, url) => {
+    shell.openExternal(url);
+  });
+
 
   // and load the index.html of the app.
   if (MAIN_WINDOW_VITE_DEV_SERVER_URL) {

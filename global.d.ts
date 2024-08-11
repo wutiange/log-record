@@ -1,4 +1,4 @@
-import { UpdateStatus } from "@/config";
+import { UpgradeCheckResult } from "@/utils/update";
 
 declare global {
   interface Window {
@@ -6,9 +6,9 @@ declare global {
       platform: string;
       onGetLogMsg: (msgCallback: (msg: Record<string, any>) => void) => void
       onGetNetworkMsg: (msgCallback: (msg: Record<string, any>) => void) => void
-      onUpdateStatusListener: (callback: (status: UpdateStatus) => void) => void
-      checkIsUpdate: () => Promise<void>,
+      checkIsUpdate: () => Promise<UpgradeCheckResult>,
       toggleDevTools: () => Promise<void>,
+      openUrl: (url: string) => void,
     };
   }
 }

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { advancedSplit } from '@/utils/log';
 import useLogStore from '../../../stores/log';
 import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
 
@@ -32,7 +33,7 @@ const resizeObserver = new ResizeObserver(entries => {
 
 
 function processString(input: string): (string | string[])[] {
-  const parts = input.split(' ');
+  const parts = advancedSplit(input);
 
   return parts.map(part => {
     if (part.includes(':')) {

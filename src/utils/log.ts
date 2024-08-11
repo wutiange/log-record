@@ -38,7 +38,7 @@ export function searchTextToCommandsMap(
   if (!searchText) {
     return commandObj;
   }
-  const searchArr = searchText.split(" ");
+  const searchArr = advancedSplit(searchText);
   for (let i = 0; i < searchArr.length; i++) {
     const e = searchArr[i];
     if (typeof e === 'string' && e.length <= 0) {
@@ -142,4 +142,33 @@ export function handleSingleTextToSelected(
     currentCommand = allCommand.next();
   }
   return { isDone: currentCommand.done, logger };
+}
+
+
+export function advancedSplit(input: string) {
+  const result = [];
+  let current = '';
+  let inQuotes = false;
+  
+  for (let i = 0; i < input.length; i++) {
+    const char = input[i];
+    
+    if (char === '"') {
+      inQuotes = !inQuotes;
+      current += char;
+    } else if (char === ' ' && !inQuotes) {
+      if (current) {
+        result.push(current);
+        current = '';
+      }
+    } else {
+      current += char;
+    }
+  }
+  
+  if (current) {
+    result.push(current);
+  }
+  
+  return result;
 }

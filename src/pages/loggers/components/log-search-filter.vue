@@ -133,7 +133,7 @@ onUnmounted(() => {
   <div class="search-container">
     <div class="input-container">
       <div :class="{ 'input-box': true, 'input-box-focus': isFocus }">
-        <div class="input-content" ref="contentDiv" :spellcheck="false" />
+        <div class="input-content" ref="contentDiv" />
         <textarea ref="textArea" v-on:blur="onBlur" v-on:focus="onFocus" v-model="searchText" placeholder="请输入搜索内容"
           class="input-item"></textarea>
       </div>
@@ -207,13 +207,15 @@ onUnmounted(() => {
   width: 100%;
   align-items: center;
   position: relative;
-  box-shadow: rgba(0, 0, 0, 0.2) 0px 0px 10px;
+  box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 5px;
   border-radius: 5px;
   padding: 8px 10px;
+  border: 1px solid rgba(60, 116, 221, 0);
 }
 
 .input-box-focus {
-  box-shadow: rgba(51, 102, 102, 0.8) 0px 0px 10px;
+  border: 1px solid rgba(60, 116, 221, 0.5);
+
 }
 
 .input-item {

@@ -65,7 +65,6 @@ watch(searchText, () => {
 })
 
 const onSearch = () => {
-  console.log(logStore.keyValues)
   logStore.updateSearchFilterByTabId(props.tabId, {
     text: searchText.value,
     isCaseSensitive: filters.isCaseSensitive
@@ -94,7 +93,8 @@ watch(searchText, (val) => {
 
 const onTag = (key: string) => {
   const size = searchText.value.length;
-  if (searchText.value[size] === ' ') {
+  const lastWord = searchText.value[size - 1];
+  if (lastWord === ' ' || lastWord === undefined) {
     searchText.value += `${key}:`
   } else {
     searchText.value += ` ${key}:`
@@ -137,7 +137,7 @@ onUnmounted(() => {
         <textarea ref="textArea" v-on:blur="onBlur" v-on:focus="onFocus" v-model="searchText" placeholder="请输入搜索内容"
           class="input-item"></textarea>
       </div>
-      <div class="tip-box" v-if="isFocus" @mousedown.prevent>
+      <div class="tip-box" v-if="isFocus &&  Object.keys(logStore.keyValues).length > 0" @mousedown.prevent>
         <div class="label-box">
           <template v-if="command === null">
             <span class="title-box">标签</span>
@@ -211,6 +211,7 @@ onUnmounted(() => {
   border-radius: 5px;
   padding: 8px 10px;
   border: 1px solid rgba(60, 116, 221, 0);
+  box-sizing: border-box;
 }
 
 .input-box-focus {
@@ -224,10 +225,9 @@ onUnmounted(() => {
   bottom: 8px;
   left: 10px;
   right: 10px;
-  display: flex;
   resize: none;
   outline: none;
-  border: 0px;
+  border: none;
   padding: 0px;
   line-height: 25px;
   margin-bottom: -1px;
@@ -238,7 +238,6 @@ onUnmounted(() => {
   color: transparent;
   overflow: hidden;
   overflow-wrap: break-word;
-  box-sizing: content-box;
 }
 
 .input-content {
@@ -250,7 +249,6 @@ onUnmounted(() => {
   font-size: 12px;
   font-family: "新宋体 Console";
   min-height: 25px;
-  box-sizing: content-box;
   height: auto;
 }
 
@@ -263,10 +261,14 @@ onUnmounted(() => {
   width: 100%;
 }
 
+.input-item::-webkit-scrollbar {
+  width: 0px;
+  height: 0px;
+}
+
+
 .group-text {
-  background: rgba(60, 116, 221, 0.09);
-  border: 1px solid rgba(60, 116, 221, 0.5);
-  margin-left: -2px;
+  background: rgba(60, 116, 221, 0.1);
   padding: 0px;
 }
 
@@ -285,7 +287,7 @@ onUnmounted(() => {
   gap: 20px;
   box-shadow: rgba(0, 0, 0, 0.2) 0px 0px 10px;
   padding-bottom: 10px;
-  top: 50px;
+  /* top: 50px; */
 }
 
 .label-box {

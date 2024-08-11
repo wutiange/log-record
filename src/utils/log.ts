@@ -157,10 +157,8 @@ export function advancedSplit(input: string) {
       inQuotes = !inQuotes;
       current += char;
     } else if (char === ' ' && !inQuotes) {
-      if (current) {
-        result.push(current);
-        current = '';
-      }
+      result.push(current);
+      current = '';
     } else {
       current += char;
     }

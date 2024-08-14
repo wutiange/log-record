@@ -68,3 +68,33 @@ export function trimQuotesAndUnescape(input: string): string {
   return input;
 }
 
+export function parseUrl(url: string): string[] {
+  try {
+    // 创建 URL 对象
+    const parsedUrl = new URL(url);
+
+    // 获取域名（包括协议）
+    const domain = `${parsedUrl.protocol}//${parsedUrl.hostname}`;
+
+    // 分割路径
+    const pathSegments = parsedUrl.pathname.split('/').filter(segment => segment !== '');
+
+    // 获取查询字符串（如果存在）
+    const queryString = parsedUrl.search ? parsedUrl.search.slice(1) : '';
+
+    // 合并最后一个路径段和查询字符串（如果存在）
+    const lastSegment = pathSegments.pop() || '';
+    const lastElement = queryString ? `${lastSegment}?${queryString}` : lastSegment;
+
+    // 构建结果数组
+    const result = [domain, ...pathSegments];
+    if (lastElement) {
+      result.push(lastElement);
+    }
+
+    return result;
+  } catch (error) {
+    console.error('Invalid URL:', error);
+    return [];
+  }
+}

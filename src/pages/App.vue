@@ -15,9 +15,7 @@ window.electronAPI.onGetLogMsg((msg) => {
   logStore.push(msg)
 })
 
-window.electronAPI.onGetNetworkMsg((msg: any) => {
-  networkStore.unshift(msg)
-})
+
 
 onMounted(() => {
   appStore.updateCheck()

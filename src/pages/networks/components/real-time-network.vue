@@ -2,6 +2,8 @@
 import { ref } from 'vue';
 import dayjs from 'dayjs'
 import useNetworkStore, { Network } from '@/stores/network';
+import { TreeProps } from 'ant-design-vue';
+import { parseUrl } from '@/utils/strings';
 const networkStore = useNetworkStore();
 const columns = ref([
   {
@@ -34,7 +36,7 @@ const columns = ref([
 const onClickItem = (item: Network) => {
   const selectedText = window.getSelection()?.toString();
   if (selectedText?.length) return;
-  networkStore.updateCurrentSelectNetwork({...item});
+  networkStore.updateCurrentSelectNetwork({ ...item });
 };
 
 function customRow(record: any) {
@@ -42,6 +44,95 @@ function customRow(record: any) {
     onClick: () => onClickItem(record)
   }
 }
+
+
+function addUrlToTree(treeData: TreeProps['treeData'], url: string, id: string): TreeProps['treeData'] {
+  const urlParts = parseUrl(url);
+
+  function generateNode(part: string, isLeaf: boolean) {
+
+    return {
+      title: part,
+      key: isLeaf ? id : `${part}-${Date.now()}`, // 生成唯一的 key,
+      children: [] as TreeProps['treeData'],
+      isLeaf,
+      selectable: isLeaf
+    };
+
+  }
+
+  function insertNode(nodes: TreeProps['treeData'], parts: string[], id: string, currentDepth: number = 0): void {
+    const currentPart = parts[currentDepth];
+
+    if (!currentPart) return;
+
+    let existingNode = nodes.find(node => node.title === currentPart);
+    if (currentDepth === parts.length - 1) {
+      const requestExist = nodes.find(node => node.key === id);
+      console.log(requestExist, '----requestExist---')
+      if (!requestExist) {
+        existingNode = generateNode(currentPart, true)
+        nodes.push(existingNode)
+      }
+    } else if (!existingNode) {
+      existingNode = generateNode(currentPart, false)
+      nodes.push(existingNode);
+    }
+
+    if (!existingNode.children) {
+      existingNode.children = [];
+    }
+
+    if (existingNode.children) {
+      insertNode(existingNode.children, parts, id, currentDepth + 1);
+    }
+  }
+
+  insertNode(treeData, urlParts, id);
+  return treeData;
+}
+
+const treeData = ref<TreeProps['treeData']>([])
+const requests = ref<Record<string, any>>({})
+
+
+
+window.electronAPI.onGetNetworkMsg((msg: any) => {
+  let id = msg.requestId
+  try {
+    if (!msg.requestId) {
+      requests.value[msg.id] = {
+        id: msg.id,
+        url: msg.url,
+        method: msg.method,
+        reqHeaders: msg.headers,
+        reqBody: msg.body,
+        createTime: msg.createTime,
+        isResponseError: msg.isResponseError ?? false,
+      }
+      id = msg.id
+    } else if (msg.isResponseError) {
+      Object.assign(requests.value[msg.requestId], { isResponseError: true });
+    } else if (msg.isTimeout) {
+      Object.assign(requests.value[msg.requestId], { isTimeout: true });
+    } else if (msg.requestId) {
+      if (typeof requests.value[msg.requestId] === "object") {
+        Object.assign(requests.value[msg.requestId], {
+          resHeaders: msg.headers,
+          resBody: msg.body,
+          statusCode: msg.statusCode,
+          endTime: msg.endTime,
+        });
+      }
+    } else {
+      return
+    }
+    treeData.value = addUrlToTree(treeData.value, requests.value[id].url, id)
+  } catch (error) {
+    console.warn("在整理网络数据的地方出现了错误", error)
+  }
+
+})
 </script>
 
 <template>
@@ -51,23 +142,25 @@ function customRow(record: any) {
       <template v-if="column.key === 'method'">
         <span>{{ record.method?.toLocaleUpperCase() }}</span>
       </template>
-      <template v-if="column.key === 'createTime'">
+<template v-if="column.key === 'createTime'">
         <span>{{ dayjs(record.createTime).format("HH:mm:ss") }}</span>
       </template>
 
-      <template v-else-if="column.key === 'statusCode'">
+<template v-else-if="column.key === 'statusCode'">
         <span v-if="record.isResponseError">错误</span>
         <span v-else-if="record.isTimeout">超时</span>
         <a-spin v-else-if="!record.statusCode" />
         <span v-else>{{ record.statusCode }}</span>
       </template>
 
-      <template v-if="column.key === 'endTime'">
+<template v-if="column.key === 'endTime'">
         <span v-if="!record.statusCode">-</span>
         <span v-else>{{ record.endTime - record.createTime }}ms</span>
       </template>
-    </template>
-    </a-table>
+</template>
+</a-table>
+    <!-- <a-directory-tree class="tree-box" :tree-data="treeData"></a-directory-tree>
+    <div class="network-content">这是显示内容</div> -->
   </div>
 </template>
 
@@ -77,6 +170,16 @@ function customRow(record: any) {
   margin-bottom: 10px;
   flex: 1;
   margin: 10px;
+  /* flex-direction: row;
+  display: flex; */
+}
+
+/deep/ .tree-box {
+  flex: 1;
+}
+
+.network-content {
+  flex: 3;
 }
 
 

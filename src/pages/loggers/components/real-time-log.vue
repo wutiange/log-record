@@ -59,7 +59,7 @@ const parseText = (text: string) => {
           <vue-json-pretty v-for="text in item.formatData" :data="parseText(text)" :deep="1" :show-double-quotes="true"
             showLength :collapsedNodeLength="1"
             :showIcon="!['string', 'number', 'null', 'undefined', 'boolean'].includes(typeof text)"
-            :collapsed-on-click-brackets="true" />
+            :collapsed-on-click-brackets="true" :key="text + item.createTime" />
         </div>
       </DynamicScrollerItem>
     </template>

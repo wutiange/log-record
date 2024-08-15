@@ -63,7 +63,7 @@ const copyText = async (text: any) => {
     <div class="strip">
       <span class="label-item">请求体：</span>
       <vue-json-pretty v-if="csn.reqBody" :data="reqBody" :deep="2" :show-double-quotes="true" showLength show-icon
-        :collapsed-on-click-brackets="true" />
+        :collapsed-on-click-brackets="true" :key="csn.id + 'requestBody'" />
       <span v-else>空</span>
       <span v-if="csn.reqBody" class="copy" @click="copyText(reqBody)">复制</span>
     </div>
@@ -89,8 +89,8 @@ const copyText = async (text: any) => {
       </div>
       <div class="strip">
         <span class="label-item">响应体：</span>
-        <vue-json-pretty v-if="csn.resBody" :data="resBody" :deep="2" :show-double-quotes="true" showLength show-icon
-          :collapsed-on-click-brackets="true" />
+        <vue-json-pretty v-if="csn.resBody" :data="resBody" :deep="3" :show-double-quotes="true" showLength show-icon
+          :collapsed-on-click-brackets="true" :key="csn.id + 'responseBody'" />
         <span v-else>空</span>
         <span v-if="csn.resBody" class="copy" @click="copyText(resBody)">复制</span>
       </div>

@@ -2,12 +2,10 @@
 import NavBar from './components/nav-bar.vue';
 import MenuBar from './components/menu-bar.vue';
 import useLogStore from '../stores/log';
-import useNetworkStore from '@/stores/network';
 import useAppStore from '@/stores/app';
 import { onMounted } from 'vue';
 
 const logStore = useLogStore();
-const networkStore = useNetworkStore();
 const appStore = useAppStore();
 
 

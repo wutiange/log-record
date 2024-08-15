@@ -102,8 +102,8 @@ const copyText = async (text: any) => {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  overflow-y: hidden;
   color: black;
+  flex: 1;
 }
 
 .strip {
@@ -123,7 +123,6 @@ const copyText = async (text: any) => {
   flex-direction: column;
   width: 100%;
   border: 1px solid #eee;
-  overflow: hidden;
   border-bottom: 1px solid #00000000;
 }
 
@@ -138,14 +137,16 @@ const copyText = async (text: any) => {
   border-right: 1px solid #eee;
   padding: 8px 10px;
   align-self: stretch;
-  width: 30%;
+  flex: 3;
   font-weight: 500;
+  flex-shrink: 0;
 }
 
 .column-value-text {
   padding: 8px 10px;
-  width: 70%;
+  flex: 7;
   word-wrap: break-word;
+  word-break: break-all;
 }
 
 .br {

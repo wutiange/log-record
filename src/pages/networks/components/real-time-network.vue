@@ -1,52 +1,10 @@
 <script setup lang="ts">
 import { ref } from 'vue';
-import dayjs from 'dayjs'
-import useNetworkStore, { Network } from '@/stores/network';
 import { TreeProps } from 'ant-design-vue';
 import { parseUrl } from '@/utils/strings';
 import SplitPane from '@/pages/components/split-pane.vue';
 import ContentArea from './content-area.vue';
-const networkStore = useNetworkStore();
-const columns = ref([
-  {
-    title: '方法',
-    dataIndex: 'method',
-    key: 'method',
-  },
-  {
-    title: '请求时间',
-    dataIndex: 'createTime',
-    key: 'createTime',
-  },
-  {
-    title: '地址',
-    dataIndex: 'url',
-    key: 'url',
-  },
-  {
-    title: '状态',
-    dataIndex: 'statusCode',
-    key: 'statusCode'
-  },
-  {
-    title: '耗时',
-    dataIndex: 'endTime',
-    key: 'endTime'
-  }
-],)
-
-const onClickItem = (item: Network) => {
-  const selectedText = window.getSelection()?.toString();
-  if (selectedText?.length) return;
-  networkStore.updateCurrentSelectNetwork({ ...item });
-};
-
-function customRow(record: any) {
-  return {
-    onClick: () => onClickItem(record)
-  }
-}
-
+import ClearIcon from '@/assets/images/clear-icon.vue'
 
 function addUrlToTree(treeData: TreeProps['treeData'], url: string, id: string): TreeProps['treeData'] {
   const urlParts = parseUrl(url);
@@ -71,7 +29,6 @@ function addUrlToTree(treeData: TreeProps['treeData'], url: string, id: string):
     let existingNode = nodes.find(node => node.title === currentPart);
     if (currentDepth === parts.length - 1) {
       const requestExist = nodes.find(node => node.key === id);
-      console.log(requestExist, '----requestExist---')
       if (!requestExist) {
         existingNode = generateNode(currentPart, true)
         nodes.push(existingNode)
@@ -138,8 +95,12 @@ window.electronAPI.onGetNetworkMsg((msg: any) => {
 })
 
 const select = (selectedKeys: string) => {
-  console.log(selectedKeys)
   selectedRequest.value = requests.value[selectedKeys[0]]
+}
+
+const onClearNetwork = () => {
+  treeData.value = []
+  requests.value = {}
 }
 </script>
 
@@ -147,8 +108,13 @@ const select = (selectedKeys: string) => {
   <div class="network-container">
     <SplitPane :initial-left-width="300" :min-width="200">
       <template #left>
-        <div class="content">
-          <a-directory-tree @select="select" class="tree-box" :tree-data="treeData"></a-directory-tree>
+        <div class="content content-left">
+          <div class="network-record">
+            <a-directory-tree @select="select" class="tree-box" :tree-data="treeData" />
+          </div>
+          <div class="tool-box">
+              <ClearIcon class="clear" @click="onClearNetwork" />
+          </div>
         </div>
       </template>
       <template #right>
@@ -161,7 +127,6 @@ const select = (selectedKeys: string) => {
 </template>
 
 <style scoped>
-
 /deep/ .tree-box {
   flex: 1;
 }
@@ -178,6 +143,8 @@ const select = (selectedKeys: string) => {
   height: 100%;
   border-radius: 10px;
   overflow: auto;
+  display: flex;
+  flex-direction: column;
 }
 
 .content::-webkit-scrollbar {
@@ -192,5 +159,53 @@ const select = (selectedKeys: string) => {
 
 .content::-webkit-scrollbar-thumb:hover {
   background-color: rgba(51, 102, 102, 1);
+}
+
+.content-left {
+  gap: 10px;
+}
+
+.network-record {
+  flex: 1;
+  overflow: auto;
+}
+
+.network-record::-webkit-scrollbar {
+  height: 5px;
+  width: 5px;
+}
+
+.network-record::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 4px;
+}
+
+.network-record::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(51, 102, 102, 1);
+}
+
+.clear {
+  width: 20px;
+  color: rgba(51, 102, 102);
+  height: 20px;
+  padding: 5px;
+  border-radius: 5px;
+  box-sizing: content-box;
+  cursor: pointer;
+}
+
+.clear:hover {
+  background-color: rgba(51, 102, 102);
+  color: white;
+}
+
+.tool-box {
+  background-color: rgba(51, 102, 102, 0.1);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 8px 10px;
+  border-radius: 5px;
+  align-self: flex-end;
 }
 </style>

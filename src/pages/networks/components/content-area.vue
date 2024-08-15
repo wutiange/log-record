@@ -44,7 +44,7 @@ const copyText = async (text: any) => {
     <contextHolder />
     <div class="strip">
       <span class="label-item">请求地址：</span>
-      <span>{{ csn.url }}</span>
+      <span class="req-url">{{ csn.url }}</span>
     </div>
     <div class="strip">
       <span class="label-item">请求时间：</span>
@@ -165,5 +165,10 @@ const copyText = async (text: any) => {
   right: 0;
   top: 0;
   cursor: pointer;
+}
+
+.req-url {
+  word-wrap: break-word;
+  word-break: break-all;
 }
 </style>

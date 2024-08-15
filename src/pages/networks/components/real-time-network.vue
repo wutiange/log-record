@@ -4,6 +4,8 @@ import dayjs from 'dayjs'
 import useNetworkStore, { Network } from '@/stores/network';
 import { TreeProps } from 'ant-design-vue';
 import { parseUrl } from '@/utils/strings';
+import SplitPane from '@/pages/components/split-pane.vue';
+import ContentArea from './content-area.vue';
 const networkStore = useNetworkStore();
 const columns = ref([
   {
@@ -94,6 +96,7 @@ function addUrlToTree(treeData: TreeProps['treeData'], url: string, id: string):
 
 const treeData = ref<TreeProps['treeData']>([])
 const requests = ref<Record<string, any>>({})
+const selectedRequest = ref<Record<string, any>>({})
 
 
 
@@ -133,112 +136,61 @@ window.electronAPI.onGetNetworkMsg((msg: any) => {
   }
 
 })
+
+const select = (selectedKeys: string) => {
+  console.log(selectedKeys)
+  selectedRequest.value = requests.value[selectedKeys[0]]
+}
 </script>
 
 <template>
-  <div class="log-container">
-    <a-table :dataSource="networkStore.networks" :columns="columns" :customRow="customRow">
-    <template #bodyCell="{ column, record }">
-      <template v-if="column.key === 'method'">
-        <span>{{ record.method?.toLocaleUpperCase() }}</span>
+  <div class="network-container">
+    <SplitPane :initial-left-width="300" :min-width="200">
+      <template #left>
+        <div class="content">
+          <a-directory-tree @select="select" class="tree-box" :tree-data="treeData"></a-directory-tree>
+        </div>
       </template>
-<template v-if="column.key === 'createTime'">
-        <span>{{ dayjs(record.createTime).format("HH:mm:ss") }}</span>
+      <template #right>
+        <div class="content">
+          <ContentArea :csn="selectedRequest" />
+        </div>
       </template>
-
-<template v-else-if="column.key === 'statusCode'">
-        <span v-if="record.isResponseError">错误</span>
-        <span v-else-if="record.isTimeout">超时</span>
-        <a-spin v-else-if="!record.statusCode" />
-        <span v-else>{{ record.statusCode }}</span>
-      </template>
-
-<template v-if="column.key === 'endTime'">
-        <span v-if="!record.statusCode">-</span>
-        <span v-else>{{ record.endTime - record.createTime }}ms</span>
-      </template>
-</template>
-</a-table>
-    <!-- <a-directory-tree class="tree-box" :tree-data="treeData"></a-directory-tree>
-    <div class="network-content">这是显示内容</div> -->
+    </SplitPane>
   </div>
 </template>
 
 <style scoped>
-.log-container {
-  overflow-y: auto;
-  margin-bottom: 10px;
-  flex: 1;
-  margin: 10px;
-  /* flex-direction: row;
-  display: flex; */
-}
 
 /deep/ .tree-box {
   flex: 1;
 }
 
-.network-content {
-  flex: 3;
+.network-container {
+  height: 100%;
+  width: 100%;
 }
 
-
-.log-container::-webkit-scrollbar {
-  display: none;
-}
-
-
-.list-item:hover {
-  background-color: #f5f5f5;
-  cursor: pointer;
-}
-
-.select-back {
-  background-color: #3366661a;
-}
-
-.log-level-sign {
-  height: 22px;
-  width: 2px;
-  margin-right: 5px;
-  flex-shrink: 0;
-}
-
-.log {
-  background-color: #1677ff;
-}
-
-.warn {
-  background-color: #faad14;
-}
-
-.error {
-  background-color: #ff4d4f;
-}
-
-.header-text {
-  white-space: nowrap;
-  overflow-x: scroll;
-  cursor: auto;
-  margin-right: auto;
-  margin-left: 8px;
-}
-
-.header-text::-webkit-scrollbar {
-  height: 3px;
-}
-
-.header-text::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 0, 0, 0.1);
-  /* 可根据需要调整颜色 */
+.content {
+  padding: 15px;
+  margin: 10px;
+  background-color: white;
+  height: 100%;
   border-radius: 10px;
+  overflow: auto;
 }
 
-.header-text::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(0, 0, 0, 0.5);
+.content::-webkit-scrollbar {
+  height: 5px;
+  width: 5px;
 }
 
-.right-outlined {
-  margin-left: 10px;
+.content::-webkit-scrollbar-thumb {
+  background-color: #ccc;
+  border-radius: 4px;
+}
+
+.content::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(51, 102, 102, 1);
 }
 </style>

@@ -1,31 +1,29 @@
 <script setup lang="ts">
-import useNetworkStore from '@/stores/network';
-import { storeToRefs } from 'pinia';
 import dayjs from 'dayjs'
-import { computed, watch } from 'vue';
+import { computed } from 'vue';
 import VueJsonPretty from 'vue-json-pretty'
 import 'vue-json-pretty/lib/styles.css'
 import { message } from 'ant-design-vue';
 const [messageApi, contextHolder] = message.useMessage();
-const networkStore = useNetworkStore();
 
-const { currentSelectNetwork: csn } = storeToRefs(networkStore)
+
+const props = defineProps(['csn'])
 
 const reqBody = computed(() => {
   try {
-    return JSON.parse(csn.value.reqBody)
+    return JSON.parse(props.csn.reqBody)
   } catch (error) {
     console.warn('解析响应体失败', error)
-    return csn.value.reqBody
+    return props.csn.value.reqBody
   }
 })
 
 const resBody = computed(() => {
   try {
-    return JSON.parse(csn.value.resBody)
+    return JSON.parse(props.csn.resBody)
   } catch (error) {
     console.warn('解析响应体失败', error)
-    return csn.value.resBody
+    return props.csn.resBody
   }
 })
 

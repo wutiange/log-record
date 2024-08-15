@@ -27,7 +27,11 @@ onMounted(() => {
     <NavBar />
     <div class="body">
       <MenuBar />
-      <RouterView />
+      <router-view v-slot="{ Component }">
+        <keep-alive>
+          <component :is="Component" />
+        </keep-alive>
+      </router-view>
     </div>
   </div>
 </template>
@@ -41,6 +45,7 @@ onMounted(() => {
   flex: 1;
   height: 0px;
 }
+
 .body {
   display: flex;
   flex-direction: row;

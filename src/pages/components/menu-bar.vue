@@ -38,7 +38,6 @@ const checkIsUpdate = async () => {
 }
 
 watch(() => appStore.updateResult.hasUpgrade, () => {
-  console.log(appStore.updateResult)
   if (appStore.updateResult.hasUpgrade) {
     openUpdate.value = true
   }

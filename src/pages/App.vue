@@ -4,16 +4,20 @@ import MenuBar from './components/menu-bar.vue';
 import useLogStore from '../stores/log';
 import useAppStore from '@/stores/app';
 import { onMounted } from 'vue';
+import useNetworkStore from '@/stores/network';
 
 const logStore = useLogStore();
 const appStore = useAppStore();
+const networkStore = useNetworkStore();
 
 
 window.electronAPI.onGetLogMsg((msg) => {
   logStore.push(msg)
 })
 
-
+window.electronAPI.onGetNetworkMsg((msg) => {
+  networkStore.updateTreeData(msg)
+})
 
 onMounted(() => {
   appStore.updateCheck()

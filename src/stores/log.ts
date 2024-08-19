@@ -1,3 +1,4 @@
+import { SearchFilterType } from "@/types/global";
 import { handleSingleTextToSelected, searchTextToCommandsMap } from "@/utils/log";
 import { defineStore } from "pinia";
 import { computed, ref } from "vue";
@@ -16,11 +17,6 @@ export type LogType = {
   system?: string;
   uniqueId?: string;
 };
-
-export type SearchFilterType = {
-  text: string;
-  isCaseSensitive: boolean;
-}
 
 const LOGGERS_MAX_SIZE = 10000
 

@@ -39,7 +39,7 @@ const copyText = async (text: any) => {
 
 </script>
 
-<template v-if="url">
+<template v-if="csn.url">
   <div class="format-text">
     <contextHolder />
     <div class="strip">

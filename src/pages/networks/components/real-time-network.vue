@@ -1,107 +1,16 @@
 <script setup lang="ts">
-import { ref } from 'vue';
-import { TreeProps } from 'ant-design-vue';
-import { parseUrl } from '@/utils/strings';
 import SplitPane from '@/pages/components/split-pane.vue';
 import ContentArea from './content-area.vue';
 import ClearIcon from '@/assets/images/clear-icon.vue'
+import useNetworkStore from '@/stores/network';
+import { computed } from 'vue';
+import { filterDataNodes } from '@/utils/network';
 
-function addUrlToTree(treeData: TreeProps['treeData'], url: string, id: string): TreeProps['treeData'] {
-  const urlParts = parseUrl(url);
+const networkStore = useNetworkStore()
 
-  function generateNode(part: string, isLeaf: boolean) {
-
-    return {
-      title: part,
-      key: isLeaf ? id : `${part}-${Date.now()}`, // 生成唯一的 key,
-      children: [] as TreeProps['treeData'],
-      isLeaf,
-      selectable: isLeaf
-    };
-
-  }
-
-  function insertNode(nodes: TreeProps['treeData'], parts: string[], id: string, currentDepth: number = 0): void {
-    const currentPart = parts[currentDepth];
-
-    if (!currentPart) return;
-
-    let existingNode = nodes.find(node => node.title === currentPart);
-    if (currentDepth === parts.length - 1) {
-      const requestExist = nodes.find(node => node.key === id);
-      if (!requestExist) {
-        existingNode = generateNode(currentPart, true)
-        nodes.push(existingNode)
-      }
-    } else if (!existingNode) {
-      existingNode = generateNode(currentPart, false)
-      nodes.push(existingNode);
-    }
-
-    if (!existingNode.children) {
-      existingNode.children = [];
-    }
-
-    if (existingNode.children) {
-      insertNode(existingNode.children, parts, id, currentDepth + 1);
-    }
-  }
-
-  insertNode(treeData, urlParts, id);
-  return treeData;
-}
-
-const treeData = ref<TreeProps['treeData']>([])
-const requests = ref<Record<string, any>>({})
-const selectedRequest = ref<Record<string, any>>({})
-
-
-
-window.electronAPI.onGetNetworkMsg((msg: any) => {
-  let id = msg.requestId
-  try {
-    if (!msg.requestId) {
-      requests.value[msg.id] = {
-        id: msg.id,
-        url: msg.url,
-        method: msg.method,
-        reqHeaders: msg.headers,
-        reqBody: msg.body,
-        createTime: msg.createTime,
-        isResponseError: msg.isResponseError ?? false,
-      }
-      id = msg.id
-    } else if (msg.isResponseError) {
-      Object.assign(requests.value[msg.requestId], { isResponseError: true });
-    } else if (msg.isTimeout) {
-      Object.assign(requests.value[msg.requestId], { isTimeout: true });
-    } else if (msg.requestId) {
-      if (typeof requests.value[msg.requestId] === "object") {
-        Object.assign(requests.value[msg.requestId], {
-          resHeaders: msg.headers,
-          resBody: msg.body,
-          statusCode: msg.statusCode,
-          endTime: msg.endTime,
-        });
-      }
-    } else {
-      return
-    }
-    treeData.value = addUrlToTree(treeData.value, requests.value[id].url, id)
-  } catch (error) {
-    console.warn("在整理网络数据的地方出现了错误", error)
-  }
-
+const filterTreeData = computed(() => {
+  return filterDataNodes(networkStore.treeData, networkStore.searchFilter)
 })
-
-const select = (selectedKeys: string) => {
-  selectedRequest.value = requests.value[selectedKeys[0]]
-}
-
-const onClearNetwork = () => {
-  treeData.value = []
-  requests.value = {}
-}
 </script>
 
 <template>
@@ -110,16 +19,16 @@ const onClearNetwork = () => {
       <template #left>
         <div class="content content-left">
           <div class="network-record">
-            <a-directory-tree @select="select" class="tree-box" :tree-data="treeData" />
+            <a-directory-tree @select="networkStore.select" class="tree-box" :tree-data="filterTreeData" />
           </div>
           <div class="tool-box">
-              <ClearIcon class="clear" @click="onClearNetwork" />
+              <ClearIcon class="clear" @click="networkStore.onClearNetwork" />
           </div>
         </div>
       </template>
       <template #right>
         <div class="content">
-          <ContentArea :csn="selectedRequest" />
+          <ContentArea :csn="networkStore.selectedRequest" />
         </div>
       </template>
     </SplitPane>
@@ -127,7 +36,7 @@ const onClearNetwork = () => {
 </template>
 
 <style scoped>
-/deep/ .tree-box {
+:deep(.tree-box) {
   flex: 1;
 }
 

@@ -207,16 +207,15 @@ onUnmounted(() => {
   width: 100%;
   align-items: center;
   position: relative;
-  box-shadow: rgba(0, 0, 0, 0.1) 0px 0px 5px;
-  border-radius: 5px;
+  border-radius: 6px;
   padding: 8px 10px;
-  border: 1px solid rgba(60, 116, 221, 0);
+  border: 1px solid #d9d9d9;
   box-sizing: border-box;
 }
 
 .input-box-focus {
-  border: 1px solid rgba(60, 116, 221, 0.5);
-
+  border: 1px solid rgba(51, 102, 102, 1);
+  box-shadow: 0 0 0 2px rgba(5, 145, 255, 0.1);
 }
 
 .input-item {
@@ -232,7 +231,7 @@ onUnmounted(() => {
   line-height: 25px;
   margin-bottom: -1px;
   background: transparent;
-  font-size: 12px;
+  font-size: 14px;
   font-family: "新宋体 Console";
   caret-color: black;
   color: transparent;
@@ -246,8 +245,8 @@ onUnmounted(() => {
   white-space: pre-wrap;
   word-break: break-word;
   line-height: 25px;
-  font-size: 12px;
   font-family: "新宋体 Console";
+  font-size: 14px;
   min-height: 25px;
   height: auto;
 }

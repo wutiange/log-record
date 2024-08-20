@@ -3,32 +3,65 @@ import { parseUrl } from "./strings";
 import type { SearchFilterType } from "@/types/global";
 import { DataNode } from "ant-design-vue/es/tree";
 
-export function addUrlToTree(treeData: TreeProps['treeData'], url: string, id: string): TreeProps['treeData'] {
-  const urlParts = parseUrl(url);
+export function getStatusColor(statusCode?: number) {
+  let statusCodeKey = 'default'
+
+  if (!statusCode) {
+    statusCodeKey = 'default'
+  }
+  // 2 开头的显示绿色
+  else if (String(statusCode).startsWith('2')) {
+    statusCodeKey = 'success'
+  }
+  // 5 开头的显示红色
+  else if (String(statusCode).startsWith('5')) {
+    statusCodeKey = 'error'
+  }
+
+  // 4 开头的显示黄色
+  else if (String(statusCode).startsWith('4')) {
+    statusCodeKey = 'warning'
+  }
+
+  return statusCodeKey
+}
+
+export function addUrlToTree(treeData: TreeProps['treeData'], request: Record<string, any> = {}): TreeProps['treeData'] {
+  if (!request.url) {
+    return treeData
+  }
+  const urlParts = parseUrl(request.url);
 
   function generateNode(part: string, isLeaf: boolean) {
-
     return {
       title: part,
-      key: isLeaf ? id : `${part}-${Date.now()}`, // 生成唯一的 key,
+      key: isLeaf ? request.id : `${part}-${Date.now()}`, // 生成唯一的 key,
       children: [] as TreeProps['treeData'],
       isLeaf,
-      selectable: isLeaf
+      selectable: isLeaf,
+      statusCode: request.statusCode,
+      statusCodeKey: request.loading ? 'processing' : getStatusColor(request.statusCode),
     };
 
   }
 
-  function insertNode(nodes: TreeProps['treeData'], parts: string[], id: string, currentDepth = 0): void {
+  function insertNode(nodes: TreeProps['treeData'], parts: string[], currentDepth = 0): void {
     const currentPart = parts[currentDepth];
 
     if (!currentPart) return;
 
     let existingNode = nodes.find(node => node.title === currentPart);
     if (currentDepth === parts.length - 1) {
-      const requestExist = nodes.find(node => node.key === id);
+      const requestExist = nodes.find(node => node.key === request.id);
       if (!requestExist) {
         existingNode = generateNode(currentPart, true)
         nodes.push(existingNode)
+      } else {
+        Object.assign(requestExist, {
+          statusCode: request.statusCode,
+          statusCodeKey: getStatusColor(request.statusCode),
+          loading: request.loading ?? false
+        })
       }
     } else if (!existingNode) {
       existingNode = generateNode(currentPart, false)
@@ -40,11 +73,11 @@ export function addUrlToTree(treeData: TreeProps['treeData'], url: string, id: s
     }
 
     if (existingNode.children) {
-      insertNode(existingNode.children, parts, id, currentDepth + 1);
+      insertNode(existingNode.children, parts, currentDepth + 1);
     }
   }
 
-  insertNode(treeData, urlParts, id);
+  insertNode(treeData, urlParts);
   return treeData;
 }
 

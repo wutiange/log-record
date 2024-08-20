@@ -23,13 +23,14 @@ const useNetworkStore = defineStore("network", () => {
           reqHeaders: msg.headers,
           reqBody: msg.body,
           createTime: msg.createTime,
+          loading: true,
           isResponseError: msg.isResponseError ?? false,
         }
         id = msg.id
       } else if (msg.isResponseError) {
-        Object.assign(requests.value[msg.requestId], { isResponseError: true });
+        Object.assign(requests.value[msg.requestId], { isResponseError: true, loading: false });
       } else if (msg.isTimeout) {
-        Object.assign(requests.value[msg.requestId], { isTimeout: true });
+        Object.assign(requests.value[msg.requestId], { isTimeout: true, loading: false });
       } else if (msg.requestId) {
         if (typeof requests.value[msg.requestId] === "object") {
           Object.assign(requests.value[msg.requestId], {
@@ -37,12 +38,14 @@ const useNetworkStore = defineStore("network", () => {
             resBody: msg.body,
             statusCode: msg.statusCode,
             endTime: msg.endTime,
+            loading: false
           });
         }
       } else {
         return
       }
-      treeData.value = addUrlToTree(treeData.value, requests.value[id].url, id)
+      const {statusCode, loading, url} = requests.value[id] ?? {}
+      treeData.value = addUrlToTree(treeData.value, {statusCode, loading, id, url})
     } catch (error) {
       console.warn("在整理网络数据的地方出现了错误", error)
     }
@@ -65,7 +68,8 @@ const useNetworkStore = defineStore("network", () => {
     selectedRequest,
     select,
     searchFilter,
-    setSearchFilter
+    setSearchFilter,
+    requests
   };
 });
 

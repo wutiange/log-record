@@ -3,14 +3,22 @@ import SplitPane from '@/pages/components/split-pane.vue';
 import ContentArea from './content-area.vue';
 import ClearIcon from '@/assets/images/clear-icon.vue'
 import useNetworkStore from '@/stores/network';
-import { computed } from 'vue';
+import { computed, h } from 'vue';
 import { filterDataNodes } from '@/utils/network';
+import { LoadingOutlined, SyncOutlined, ClockCircleOutlined } from '@ant-design/icons-vue';
+const indicator = h(LoadingOutlined, {
+  style: {
+    fontSize: '15px',
+  },
+  spin: true,
+});
 
 const networkStore = useNetworkStore()
 
 const filterTreeData = computed(() => {
   return filterDataNodes(networkStore.treeData, networkStore.searchFilter)
 })
+
 </script>
 
 <template>
@@ -19,10 +27,23 @@ const filterTreeData = computed(() => {
       <template #left>
         <div class="content content-left">
           <div class="network-record">
-            <a-directory-tree @select="networkStore.select" class="tree-box" :tree-data="filterTreeData" />
+            <a-directory-tree @select="networkStore.select" class="tree-box" :tree-data="filterTreeData">
+              <template #title="{ title, isLeaf, statusCodeKey, statusCode }">
+                <span v-if="isLeaf">
+                  <a-tag v-if="statusCodeKey === 'processing'">
+                    <clock-circle-outlined  :spin="true" />
+                  </a-tag>
+                  <a-tag v-else :color="statusCodeKey">
+                    {{ statusCode }}
+                  </a-tag>
+                  <span>{{ title }}</span>
+                </span>
+                <span v-else>{{ title }}</span>
+              </template>
+            </a-directory-tree>
           </div>
           <div class="tool-box">
-              <ClearIcon class="clear" @click="networkStore.onClearNetwork" />
+            <ClearIcon class="clear" @click="networkStore.onClearNetwork" />
           </div>
         </div>
       </template>
@@ -36,6 +57,13 @@ const filterTreeData = computed(() => {
 </template>
 
 <style scoped>
+:deep(.ant-tree-node-content-wrapper) {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 200px;
+}
+
 :deep(.tree-box) {
   flex: 1;
 }
@@ -116,5 +144,23 @@ const filterTreeData = computed(() => {
   padding: 8px 10px;
   border-radius: 5px;
   align-self: flex-end;
+}
+
+.status-normal {
+  text-align: center;
+  vertical-align: middle;
+  margin: 0 2px;
+}
+
+.status-success {
+  color: #00ff00;
+}
+
+.status-error {
+  color: #ff0000;
+}
+
+.status-warning {
+  color: #ffff00;
 }
 </style>

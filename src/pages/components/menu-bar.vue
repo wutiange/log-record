@@ -102,28 +102,31 @@ const onUpdate = () => {
 }
 
 .setting-icon {
-  font-size: 25px;
+  font-size: 20px;
+  cursor: pointer;
+  color: var(--color-main);
 }
 
 .icon {
-  width: 25px;
-  height: 25px;
+  width: 20px;
+  height: 20px;
   transform: translate(-100px);
-  filter: drop-shadow(100px 0 0 #336666);
+  filter: drop-shadow(100px 0 0 var(--color-main));
 }
 
 .icon-container {
   padding: 5px;
   cursor: pointer;
+  display: flex;
 }
 
 .selected-icon-container {
   background-color: rgba(51, 102, 102, 0.5);
-  border-radius: 5px;
+  border-radius: var(--border-radius-default);
 }
 
 .selected-icon {
-  filter: drop-shadow(100px 0 0 #fff);
+  filter: drop-shadow(100px 0 0 var(--color-background));
 }
 
 .version {
@@ -136,7 +139,7 @@ p {
 }
 
 .have-update-text {
-  color: red;
+  color: var(--color-error);
 }
 
 .update-content {

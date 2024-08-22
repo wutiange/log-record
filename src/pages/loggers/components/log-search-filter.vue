@@ -179,7 +179,7 @@ onUnmounted(() => {
 
 .case-sensitivity-container {
   padding: 5px;
-  border-radius: 5px;
+  border-radius: var(--border-radius-default);
   cursor: pointer;
   overflow: hidden;
   flex-shrink: 0;
@@ -207,20 +207,20 @@ onUnmounted(() => {
   width: 100%;
   align-items: center;
   position: relative;
-  border-radius: 6px;
-  padding: 8px 10px;
-  border: 1px solid #d9d9d9;
+  border-radius: var(--border-radius-default);
+  padding: 4px 10px;
+  border: 1px solid var(--color-scroll);
   box-sizing: border-box;
 }
 
 .input-box-focus {
-  border: 1px solid rgba(51, 102, 102, 1);
+  border: 1px solid var(--color-main);
   box-shadow: 0 0 0 2px rgba(5, 145, 255, 0.1);
 }
 
 .input-item {
   position: absolute;
-  top: 8px;
+  top: 4px;
   bottom: 8px;
   left: 10px;
   right: 10px;
@@ -311,7 +311,7 @@ onUnmounted(() => {
 .tag-text {
   cursor: pointer;
   padding: 2px 5px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+  border: 1px solid var(--color-scroll);
+  border-radius: var(--border-radius-default);
 }
 </style>

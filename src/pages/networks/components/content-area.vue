@@ -102,7 +102,6 @@ const copyText = async (text: any) => {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  color: black;
   flex: 1;
 }
 
@@ -122,19 +121,25 @@ const copyText = async (text: any) => {
   display: flex;
   flex-direction: column;
   width: 100%;
-  border: 1px solid #eee;
-  border-bottom: 1px solid #00000000;
+  border: 1px solid var(--color-scroll);
+  border-radius: var(--border-radius-default);
 }
+
 
 .row-container {
   display: flex;
   flex-direction: row;
   align-items: center;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--color-scroll);
 }
 
+.row-container:nth-last-child(1) {
+  border-bottom-width: 0px;
+}
+
+
 .column-text {
-  border-right: 1px solid #eee;
+  border-right: 1px solid var(--color-scroll);
   padding: 8px 10px;
   align-self: stretch;
   flex: 3;
@@ -152,12 +157,12 @@ const copyText = async (text: any) => {
 .br {
   width: 100%;
   height: 1px;
-  background-color: #ccc;
+  background-color: var(--color-scroll);
 }
 
 .highlight {
   flex: 1;
-  border-radius: 5px;
+  border-radius: var(--border-radius-default);
 }
 
 .copy {

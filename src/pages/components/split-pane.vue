@@ -1,10 +1,10 @@
 <template>
   <div class="split-pane" @mouseup="onMouseUp" @mousemove="onMouseMove">
-    <div class="pane left-pane" :style="{ width: leftWidth + 'px' }">
+    <div class="pane" :style="{ width: leftWidth + 'px' }">
       <slot name="left"></slot>
     </div>
     <div class="divider" @mousedown="onMouseDown"></div>
-    <div class="pane right-pane" :style="{ width: `calc(100% - ${leftWidth}px)` }">
+    <div class="pane" :style="{ width: `calc(100% - ${leftWidth}px)` }">
       <slot name="right"></slot>
     </div>
   </div>
@@ -73,19 +73,13 @@ export default {
   height: 100%;
   display: flex;
   flex-direction: column;
+  background-color: var(--color-background-mute);
 }
 
 .divider {
   width: 4px;
-  background-color: #ccc;
+  background-color: var(--color-scroll);
   cursor: col-resize;
 }
 
-.left-pane {
-  background-color: #f5f5f5;
-}
-
-.right-pane {
-  background-color: #f5f5f5;
-}
 </style>

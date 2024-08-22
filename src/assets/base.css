@@ -3,12 +3,16 @@
   --vt-c-white: #ffffff;
   --vt-c-white-soft: #f8f8f8;
   --vt-c-white-mute: #f2f2f2;
+  --vt-c-scroll-white: #D3D3D3;
 
   --vt-c-black: #181818;
   --vt-c-black-soft: #222222;
   --vt-c-black-mute: #282828;
+  --vt-c-scroll-black: #333333;
 
   --vt-c-indigo: #2c3e50;
+
+  --vt-c-bitter-green: rgba(51, 102, 102, 1);
 
   --vt-c-divider-light-1: rgba(60, 60, 60, 0.29);
   --vt-c-divider-light-2: rgba(60, 60, 60, 0.12);
@@ -19,10 +23,13 @@
   --vt-c-text-light-2: rgba(60, 60, 60, 0.66);
   --vt-c-text-dark-1: var(--vt-c-white);
   --vt-c-text-dark-2: rgba(235, 235, 235, 0.64);
+  
 }
 
 /* semantic color variables for this project */
 :root {
+  --color-main: var(--vt-c-bitter-green);
+
   --color-background: var(--vt-c-white);
   --color-background-soft: var(--vt-c-white-soft);
   --color-background-mute: var(--vt-c-white-mute);
@@ -34,6 +41,13 @@
   --color-text: var(--vt-c-text-light-1);
 
   --section-gap: 160px;
+  --color-scroll: var(--vt-c-scroll-white);
+
+  --border-radius-large: 10px;
+  --border-radius-default: 5px;
+
+  --color-error: #ff4d4f;
+  --color-warn: #faad14
 }
 
 @media (prefers-color-scheme: dark) {
@@ -47,6 +61,8 @@
 
     --color-heading: var(--vt-c-text-dark-1);
     --color-text: var(--vt-c-text-dark-2);
+
+    --color-scroll: var(--vt-c-scroll-black);
   }
 }
 

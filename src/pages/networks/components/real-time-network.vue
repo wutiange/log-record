@@ -68,6 +68,19 @@ const filterTreeData = computed(() => {
   flex: 1;
 }
 
+:deep(.ant-tree-treenode-selected) {
+  background: var(--color-main);
+}
+:deep(.ant-tree-treenode-selected::before) {
+  background: none !important;
+}
+
+:deep(.ant-tag) {
+  font-size: 10px;
+  padding-inline: 4px;
+  line-height: 14px;
+}
+
 .network-container {
   height: 100%;
   width: 100%;
@@ -76,12 +89,13 @@ const filterTreeData = computed(() => {
 .content {
   padding: 15px;
   margin: 10px;
-  background-color: white;
   height: 100%;
-  border-radius: 10px;
+  border-radius: var(--border-radius-large);
+
   overflow: auto;
   display: flex;
   flex-direction: column;
+  background-color: var(--color-background)
 }
 
 .content::-webkit-scrollbar {
@@ -90,12 +104,12 @@ const filterTreeData = computed(() => {
 }
 
 .content::-webkit-scrollbar-thumb {
-  background-color: #ccc;
-  border-radius: 4px;
+  background-color: var(--color-scroll);
+  border-radius: var(--border-radius-default);
 }
 
 .content::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(51, 102, 102, 1);
+  background-color: var(--color-main);
 }
 
 .content-left {
@@ -113,27 +127,27 @@ const filterTreeData = computed(() => {
 }
 
 .network-record::-webkit-scrollbar-thumb {
-  background-color: #ccc;
-  border-radius: 4px;
+  background-color: var(--color-scroll);
+  border-radius: var(--border-radius-default);
 }
 
 .network-record::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(51, 102, 102, 1);
+  background-color: var(--color-main);
 }
 
 .clear {
   width: 20px;
-  color: rgba(51, 102, 102);
+  color: var(--color-main);
   height: 20px;
   padding: 5px;
-  border-radius: 5px;
+  border-radius: var(--border-radius-default);
   box-sizing: content-box;
   cursor: pointer;
 }
 
 .clear:hover {
-  background-color: rgba(51, 102, 102);
-  color: white;
+  background-color: var(--color-main);
+  color: var(--color-background);
 }
 
 .tool-box {
@@ -141,8 +155,7 @@ const filterTreeData = computed(() => {
   display: flex;
   flex-direction: row;
   align-items: center;
-  padding: 8px 10px;
-  border-radius: 5px;
+  border-radius: var(--border-radius-default);
   align-self: flex-end;
 }
 

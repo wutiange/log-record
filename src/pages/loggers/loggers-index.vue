@@ -109,7 +109,7 @@ onMounted(() => {
   bottom: 100px;
   right: 100px;
   background-color: rgba(51, 102, 102, 0.3);
-  border-radius: 5px;
+  border-radius: var(--border-radius-default);
   overflow: hidden;
   height: 45px;
 }
@@ -124,7 +124,7 @@ onMounted(() => {
   outline: none;
 }
 .custom-icon:hover {
-  background-color: rgba(51, 102, 102, 1);
+  background-color: var(--color-main);
   cursor: pointer;
 }
 

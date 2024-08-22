@@ -53,7 +53,7 @@ const parseText = (text: string) => {
         item.formatData,
       ]" :data-index="index" class="item-box">
         <div :class="`log-level-sign ${item.level}`" />
-        <a-tag color="default" class="tag-box">{{ dayjs(item.createTime).format("HH:mm:ss.SSS") }}</a-tag>
+        <a-tag class="tag-box">{{ dayjs(item.createTime).format("HH:mm:ss.SSS") }}</a-tag>
 
         <div class="msg-text">
           <vue-json-pretty v-for="text in item.formatData" :data="parseText(text)" :deep="1" :show-double-quotes="true"
@@ -81,12 +81,12 @@ const parseText = (text: string) => {
 }
 
 .log-container::-webkit-scrollbar-thumb {
-  background-color: #ccc;
-  border-radius: 4px;
+  background-color: var(--color-scroll);
+  border-radius: var(--border-radius-default);
 }
 
 .log-container::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(51, 102, 102, 1);
+  background-color: var(--color-main);
 }
 
 
@@ -110,16 +110,12 @@ const parseText = (text: string) => {
   align-self: flex-start;
 }
 
-.log {
-  background-color: #1677ff;
-}
-
 .warn {
-  background-color: #faad14;
+  background-color: var(--color-warn);
 }
 
 .error {
-  background-color: #ff4d4f;
+  background-color: var(--color-error);
 }
 
 .header-text {

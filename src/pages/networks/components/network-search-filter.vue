@@ -34,7 +34,7 @@ const networkStore = useNetworkStore()
 }
 
 .search-box:focus {
-  border-color: rgba(51, 102, 102, 1);
+  border-color: var(--color-main);
 }
 
 .case-sensitivity-container {
@@ -43,7 +43,7 @@ const networkStore = useNetworkStore()
 }
 
 .case-sensitivity-container-selected {
-  color: white;
+  color: var(--color-background);
   background-color: rgb(51, 102, 102, 0.5);
 }
 

@@ -44,8 +44,6 @@ onMounted(() => {
 .container {
   display: flex;
   flex-direction: column;
-  background-color: #ffffff;
-  color: #999999;
   flex: 1;
   height: 0px;
 }
@@ -55,5 +53,32 @@ onMounted(() => {
   flex-direction: row;
   flex: 1;
   height: 0;
+}
+
+:deep(.ant-tag) {
+  color: var(--color-text);
+}
+:deep(.ant-tag-success) {
+  color: var(--vt-c-text-light-1);
+}
+:deep(.ant-tabs .ant-tabs-nav::before) {
+  border-bottom: 1px solid var(--color-background-mute) !important;
+
+}
+:deep(.ant-tabs-nav .ant-tabs-tab-active) {
+  background: var(--color-background);
+  color: var(--color-main);
+  border-bottom-color: var(--color-background) !important;
+  border: 1px solid var(--color-background-mute);
+}
+:deep(.ant-tabs .ant-tabs-tab-remove) {
+  color: var(--color-main);
+}
+:deep(.ant-tabs-tab.ant-tabs-tab-active .ant-tabs-tab-btn) {
+  color: var(--color-main);
+}
+:deep(.ant-tree) {
+  background: var(--color-background);
+  color: var(--color-text);
 }
 </style>

@@ -1,42 +1,42 @@
 <script setup lang="ts">
-import dayjs from 'dayjs'
+import dayjs from 'dayjs';
 import { computed } from 'vue';
-import VueJsonPretty from 'vue-json-pretty'
-import 'vue-json-pretty/lib/styles.css'
+import VueJsonPretty from 'vue-json-pretty';
+import 'vue-json-pretty/lib/styles.css';
 import { message } from 'ant-design-vue';
 const [messageApi, contextHolder] = message.useMessage();
 
-
-const props = defineProps(['csn'])
+const props = defineProps(['csn']);
 
 const reqBody = computed(() => {
   try {
-    return JSON.parse(props.csn.reqBody)
+    return JSON.parse(props.csn.reqBody);
   } catch (error) {
-    console.warn('解析响应体失败', error)
-    return props.csn.value.reqBody
+    console.warn('解析响应体失败', error);
+    return props.csn.reqBody ?? null;
   }
-})
+});
 
 const resBody = computed(() => {
   try {
-    return JSON.parse(props.csn.resBody)
+    return JSON.parse(props.csn.resBody);
   } catch (error) {
-    console.warn('解析响应体失败', error)
-    return props.csn.resBody
+    console.warn('解析响应体失败', error);
+    return props.csn.resBody;
   }
-})
+});
 
 const copyText = async (text: any) => {
   try {
-    await navigator.clipboard.writeText(typeof text === 'object' ? JSON.stringify(text) : text);
+    await navigator.clipboard.writeText(
+      typeof text === 'object' ? JSON.stringify(text) : text,
+    );
     messageApi.info('复制成功');
   } catch (err) {
     messageApi.warning('复制失败');
     console.error('无法复制文本: ', err);
   }
 };
-
 </script>
 
 <template v-if="csn.url">
@@ -48,11 +48,14 @@ const copyText = async (text: any) => {
     </div>
     <div class="strip">
       <span class="label-item">请求时间：</span>
-      <span>{{ dayjs(csn.createTime).format("YYYY-MM-DD HH:mm:ss") }}</span>
+      <span>{{ dayjs(csn.createTime).format('YYYY-MM-DD HH:mm:ss') }}</span>
     </div>
     <div class="strip">
       <span class="label-item">请求头：</span>
-      <div class="headers-container" v-if="Object.keys(csn.reqHeaders ?? {}).length !== 0">
+      <div
+        class="headers-container"
+        v-if="Object.keys(csn.reqHeaders ?? {}).length !== 0"
+      >
         <div class="row-container" v-for="(value, key) in csn.reqHeaders">
           <span class="column-text">{{ key }}</span>
           <span class="column-value-text">{{ value }}</span>
@@ -62,16 +65,26 @@ const copyText = async (text: any) => {
     </div>
     <div class="strip">
       <span class="label-item">请求体：</span>
-      <vue-json-pretty v-if="csn.reqBody" :data="reqBody" :deep="2" :show-double-quotes="true" showLength show-icon
-        :collapsed-on-click-brackets="true" :key="csn.id + 'requestBody'" />
+      <vue-json-pretty
+        v-if="csn.reqBody"
+        :data="reqBody"
+        :deep="2"
+        :show-double-quotes="true"
+        showLength
+        show-icon
+        :collapsed-on-click-brackets="true"
+        :key="csn.id + 'requestBody'"
+      />
       <span v-else>空</span>
-      <span v-if="csn.reqBody" class="copy" @click="copyText(reqBody)">复制</span>
+      <span v-if="csn.reqBody" class="copy" @click="copyText(reqBody)">
+        复制
+      </span>
     </div>
     <div class="br" />
     <template v-if="csn.statusCode">
       <div class="strip">
         <span class="label-item">响应时间：</span>
-        <span>{{ dayjs(csn.endTime).format("YYYY-MM-DD HH:mm:ss") }}</span>
+        <span>{{ dayjs(csn.endTime).format('YYYY-MM-DD HH:mm:ss') }}</span>
       </div>
       <div class="strip">
         <span class="label-item">响应状态：</span>
@@ -79,7 +92,10 @@ const copyText = async (text: any) => {
       </div>
       <div class="strip">
         <span class="label-item">响应头：</span>
-        <div class="headers-container" v-if="Object.keys(csn.resHeaders ?? {}).length !== 0">
+        <div
+          class="headers-container"
+          v-if="Object.keys(csn.resHeaders ?? {}).length !== 0"
+        >
           <div class="row-container" v-for="(value, key) in csn.resHeaders">
             <span class="column-text">{{ key }}</span>
             <span class="column-value-text">{{ value }}</span>
@@ -89,10 +105,20 @@ const copyText = async (text: any) => {
       </div>
       <div class="strip">
         <span class="label-item">响应体：</span>
-        <vue-json-pretty v-if="csn.resBody" :data="resBody" :deep="3" :show-double-quotes="true" showLength show-icon
-          :collapsed-on-click-brackets="true" :key="csn.id + 'responseBody'" />
+        <vue-json-pretty
+          v-if="csn.resBody"
+          :data="resBody"
+          :deep="3"
+          :show-double-quotes="true"
+          showLength
+          show-icon
+          :collapsed-on-click-brackets="true"
+          :key="csn.id + 'responseBody'"
+        />
         <span v-else>空</span>
-        <span v-if="csn.resBody" class="copy" @click="copyText(resBody)">复制</span>
+        <span v-if="csn.resBody" class="copy" @click="copyText(resBody)">
+          复制
+        </span>
       </div>
     </template>
   </div>
@@ -125,7 +151,6 @@ const copyText = async (text: any) => {
   border-radius: var(--border-radius-default);
 }
 
-
 .row-container {
   display: flex;
   flex-direction: row;
@@ -136,7 +161,6 @@ const copyText = async (text: any) => {
 .row-container:nth-last-child(1) {
   border-bottom-width: 0px;
 }
-
 
 .column-text {
   border-right: 1px solid var(--color-scroll);

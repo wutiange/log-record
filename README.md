@@ -1,15 +1,14 @@
 将来计划：
+
 - [x] 优化日志太多的性能问题（1.0.6）；
 - [x] 优化日志搜索（1.0.6）；
 - [x] 优化网络日志的查看体验（1.0.7）；
 - [x] 新增网络清空功能（1.0.7）；
 - [x] 支持手动检查更新（1.0.7）；
-- [ ] 优化网络日志太多的性能问题，改善体验（1.0.8）；
-- [ ] 新增网络日志搜索（1.0.8）；
+- [x] 优化网络日志太多的性能问题，改善体验（1.0.8）；
+- [x] 新增网络日志搜索（1.0.8）；
+- [ ] 新增连接日志系统提示（1.0.9）；
 - [ ] 新增英文版本（1.1.0）；
-- [ ] 筹备基于 websocket 协议的日志系统，做到双向控制（2.0.0）。
-
-
 
 ## 1、背景
 
@@ -38,7 +37,7 @@ yarn add @wutiange/log-listener-plugin
 接下里需要在代码中进行初始化：
 
 ```ts
-logger.setBaseUrl(await getTestUrl())
+logger.setBaseUrl(await getTestUrl());
 logger.setBaseData({
   env,
   version: displayVersion,
@@ -49,7 +48,7 @@ logger.setBaseData({
   manufacturer: DeviceInfo.getManufacturerSync(),
   systemName: DeviceInfo.getSystemName(),
   uniqueId: DeviceInfo.getUniqueId(),
-})
+});
 ```
 
 其中 `testUrl` 就是日志应用所在的 `IP` 地址，而 `baseData` 则是每条日志包含的基础信息。假如你的日志系统是在自己电脑上打开的，那么这里的 `testUrl` 就是你电脑的地址。
@@ -57,50 +56,50 @@ logger.setBaseData({
 要想上报日志，那么调用以下方法即可：
 
 ```ts
-import logger from '@wutiange/log-listener-plugin'
-logger.log("日志信息")
-logger.warn("警告信息")
-logger.error("错误信息")
+import logger from '@wutiange/log-listener-plugin';
+logger.log('日志信息');
+logger.warn('警告信息');
+logger.error('错误信息');
 ```
 
 要想上报网络信息，那么：
 
 ```ts
-import logger from '@wutiange/log-listener-plugin'
+import logger from '@wutiange/log-listener-plugin';
 // 其中 input 和 init 跟 fetch 函数的参数相同
-const logReqId = await logger.req(input, init)
+const logReqId = await logger.req(input, init);
 // 其中 logReqId 就是 req 返回的 id ； response 则是通过 fetch 请求返回的结果
-logger.res(Number(logReqId), response.clone())
+logger.res(Number(logReqId), response.clone());
 ```
 
 做了这些以后，基本上就完成了。但还是要注意一下，其中 `testUrl` 和 `baseData` 不能为空，由于 App 刚开始的时候这些值可能是空的，那么你就需要保证不为空的时候才初始化。参考我使用的方式：
 
 ```ts
-import DeviceInfo from 'react-native-device-info'
-import logger from '@wutiange/log-listener-plugin'
-import AsyncStorage from '@react-native-async-storage/async-storage'
-import { displayVersion } from '@/../app.json'
-import { buildType } from './bridge/SenseCAP'
+import DeviceInfo from 'react-native-device-info';
+import logger from '@wutiange/log-listener-plugin';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { displayVersion } from '@/../app.json';
+import { buildType } from './bridge/SenseCAP';
 
-let testUrl = ''
-const testUrlKey = '__testUrl__'
+let testUrl = '';
+const testUrlKey = '__testUrl__';
 export function setTestUrl(url) {
-  let tempUrl = url
+  let tempUrl = url;
   if (tempUrl !== '' && tempUrl.indexOf('http://') !== 0) {
-    tempUrl = `http://${tempUrl}`
+    tempUrl = `http://${tempUrl}`;
   }
-  testUrl = tempUrl
+  testUrl = tempUrl;
   // 设置 url 的时候同时保存到本地
-  AsyncStorage.setItem(testUrlKey, testUrl)
-  logger.setBaseUrl(testUrl)
+  AsyncStorage.setItem(testUrlKey, testUrl);
+  logger.setBaseUrl(testUrl);
 }
 
 export async function getTestUrl() {
   // 如果没有值，那么从本地取
   if (!testUrl) {
-    testUrl = await AsyncStorage.getItem(testUrlKey)
+    testUrl = await AsyncStorage.getItem(testUrlKey);
   }
-  return testUrl
+  return testUrl;
 }
 
 async function initLogger() {
@@ -108,8 +107,8 @@ async function initLogger() {
   获取构建环境字符串，我们采用了热更新，所以这里是
   debug staging release
   */
-  const env = await buildType()
-  logger.setBaseUrl(await getTestUrl())
+  const env = await buildType();
+  logger.setBaseUrl(await getTestUrl());
   logger.setBaseData({
     env,
     version: displayVersion,
@@ -120,54 +119,53 @@ async function initLogger() {
     manufacturer: DeviceInfo.getManufacturerSync(),
     systemName: DeviceInfo.getSystemName(),
     uniqueId: DeviceInfo.getUniqueId(),
-  })
+  });
 }
 
 // 防止调用的地方由于没有设置 url 导致报错，这里统一处理
 export function getLogger() {
   if (testUrl) {
-    return logger
+    return logger;
   }
 }
 
 // 这样我在使用的地方就这样
-getLogger()?.log(message, ...optionalParams)
+getLogger()?.log(message, ...optionalParams);
 ```
 
 完成上面这些 `react-native` 应用就具备日志查看的能力了。
 
-在版本 `1.1.9` 中新增全新的一种方式，这种方式更简单。只需要导入两个文件就能自动承接 `console` 和 `fetch` ，这样就不需要在对应的位置操作了，项目就跟之前一样不需要添加任何其他代码。当然由于上传日志需要 `IP` ，所以 `IP` 必须设置的，也就是上面的 `testUrl` ，至于 `baseData` 也是需要设置的，只不过这些都不是强制要求。
+在版本 `1.1.9` 中新增全新的一种方式，这种方式更简单。只需要导入两个文件就能自动承接 `console` 和 `fetch` ，这样就不需要在对应的位置操作了，项目就跟之前一样不需要添加任何其他代码。当然由于上传日志需要 `IP` ，所以 `IP` 必须设置的，也就是上面的 `testUrl` ，至于 `baseData` 也是需要设置的，只不过这些都不是强制要求。日志使用 baseData 来过滤。
 
 ```js
 // console 的接管
-import '@wutiange/log-listener-plugin/dist/console'
+import '@wutiange/log-listener-plugin/dist/console';
 // fetch 的接管
-import '@wutiange/log-listener-plugin/dist/fetch'
+import '@wutiange/log-listener-plugin/dist/fetch';
 
-
-let testUrl = ''
-const testUrlKey = '__testUrl__'
+let testUrl = '';
+const testUrlKey = '__testUrl__';
 export function setTestUrl(url) {
-  let tempUrl = url
+  let tempUrl = url;
   if (tempUrl !== '' && tempUrl.indexOf('http://') !== 0) {
-    tempUrl = `http://${tempUrl}`
+    tempUrl = `http://${tempUrl}`;
   }
-  testUrl = tempUrl
-  AsyncStorage.setItem(testUrlKey, testUrl)
-  logger.setBaseUrl(testUrl)
+  testUrl = tempUrl;
+  AsyncStorage.setItem(testUrlKey, testUrl);
+  logger.setBaseUrl(testUrl);
 }
 
 export async function getTestUrl() {
   if (!testUrl) {
-    testUrl = await AsyncStorage.getItem(testUrlKey)
+    testUrl = await AsyncStorage.getItem(testUrlKey);
   }
-  return testUrl
+  return testUrl;
 }
 
 async function initLogger() {
-  const env = await buildType()
-  logger.setBaseUrl(await getTestUrl())
-  logger.setTimeout(10000)
+  const env = await buildType();
+  logger.setBaseUrl(await getTestUrl());
+  logger.setTimeout(10000);
   logger.setBaseData({
     env,
     version: displayVersion,
@@ -178,10 +176,10 @@ async function initLogger() {
     manufacturer: DeviceInfo.getManufacturerSync(),
     systemName: DeviceInfo.getSystemName(),
     deviceUniqueId: DeviceInfo.getUniqueId(),
-  })
+  });
 }
 
-initLogger()
+initLogger();
 ```
 
 在 `index.js` 入口文件中添加上面代码就可以了，其余的都不用管了。我上面之所以会对 `testUrl` 进行包装是因为，我 `app` 设置中可以手动设置，这样方便切换。
@@ -262,22 +260,27 @@ initLogger()
 
 ```ts
 class ServerClient {
-  private app: Express | null = null
-  private runningServer: Server<typeof IncomingMessage, typeof ServerResponse> | null = null
+  private app: Express | null = null;
+  private runningServer: Server<
+    typeof IncomingMessage,
+    typeof ServerResponse
+  > | null = null;
   constructor() {
     this.app = express();
-    this.app.use(express.json())
+    this.app.use(express.json());
   }
 
-  startListen(pathHandle: Record<string, (msg: Record<string, unknown>) => void> = {}) {
-    this.stopListen()
+  startListen(
+    pathHandle: Record<string, (msg: Record<string, unknown>) => void> = {},
+  ) {
+    this.stopListen();
     let id = 0;
     Object.entries(pathHandle).forEach(([path, handle]) => {
       this.app.post(path, function (req, res) {
-        handle({ id: ++id, ...req.body })
+        handle({ id: ++id, ...req.body });
         res.end(id.toString());
       });
-    })
+    });
 
     this.runningServer = this.app.listen(httpPort);
   }
@@ -285,11 +288,11 @@ class ServerClient {
   stopListen() {
     // 当服务还在运行的时候，在关闭对话框的过程中需要把服务也关闭
     if (this.runningServer?.listening) {
-      this.runningServer.close()
+      this.runningServer.close();
     }
   }
 }
-export default new ServerClient()
+export default new ServerClient();
 ```
 
 其中全是 `post` 请求，并且成功以后返回对应的 `id` ，目前 `id` 是本地递增的。只支持 `body` 的类型是 `json` 数据格式。要想启动服务，在 `main.ts` 中调用 `startListen` 来开启。
@@ -297,12 +300,12 @@ export default new ServerClient()
 ```ts
 serverClient.startListen({
   '/log': (msg) => {
-    mainWindow.webContents.send('log:msg', msg)
+    mainWindow.webContents.send('log:msg', msg);
   },
   '/network': (msg) => {
-    mainWindow.webContents.send('network:msg', msg)
-  }
-})
+    mainWindow.webContents.send('network:msg', msg);
+  },
+});
 ```
 
 这里主要就是两个，一个是日志一个是网络。
@@ -319,14 +322,14 @@ serverClient.startListen({
 
 ```ts
 export function searchTextToCommandsMap(
-  searchText: string
+  searchText: string,
 ): Map<string, string[]> {
   const commandObj = new Map();
   if (!searchText) {
     return commandObj;
   }
   // 先按空格分隔用户搜索的字符串
-  const searchArr = searchText.split(" ");
+  const searchArr = searchText.split(' ');
   for (let i = 0; i < searchArr.length; i++) {
     const e = searchArr[i];
     // 如果元素为空，那么就直接跳过，也就是这种情况 <nihao > 其中nihao后面
@@ -335,9 +338,9 @@ export function searchTextToCommandsMap(
       continue;
     }
     // 然后按:来分隔，来看条件和值，如果用户要输入:，那么就需要加上\
-    if (e.includes(":") && !e.includes("\:")) {
+    if (e.includes(':') && !e.includes(':')) {
       // 分隔以后，第一个元素就是条件，第二个就是值
-      const commandArr = e.split(":");
+      const commandArr = e.split(':');
       const command = commandArr[0];
       if (commandArr[1]?.length) {
         const value = commandObj.get(command) ?? [];
@@ -346,9 +349,9 @@ export function searchTextToCommandsMap(
       }
     } else {
       // 说明是普通文本，普通文本要将 文本 按照 text:文本 来处理
-      const value = commandObj.get("text") ?? [];
+      const value = commandObj.get('text') ?? [];
       value.push(e);
-      commandObj.set("text", value);
+      commandObj.set('text', value);
     }
   }
   return commandObj;
@@ -361,13 +364,13 @@ export function searchTextToCommandsMap(
 export function handleTextCommand(
   commandObj: Map<string, string[]>,
   logger: LogType,
-  isCaseSensitive = false
+  isCaseSensitive = false,
 ) {
-  if (commandObj.has("text")) {
+  if (commandObj.has('text')) {
     // 先把数组按字符串的长度排序，目的是照顾长的，这样在下面短的自动会被替换掉
     // 也就是如果出现 a ab 这两个，优先显示照顾 ab
-    const values = (commandObj.get("text") ?? []).sort(
-      (a, b) => a.length - b.length
+    const values = (commandObj.get('text') ?? []).sort(
+      (a, b) => a.length - b.length,
     );
     const allIndices: Record<string, number> = {};
     for (let i = 0; i < values.length; i++) {
@@ -375,7 +378,7 @@ export function handleTextCommand(
       const indices = findAllSubstringIndices(
         logger.text,
         val,
-        isCaseSensitive
+        isCaseSensitive,
       );
       if (!Object.keys(indices).length) {
         return false;
@@ -401,7 +404,7 @@ export function handleTextCommand(
         logger.text,
         index,
         size,
-        swapTextToMark(replacement)
+        swapTextToMark(replacement),
       );
     }
 

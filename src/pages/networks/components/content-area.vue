@@ -14,7 +14,7 @@ const reqBody = computed(() => {
     return JSON.parse(props.csn.reqBody)
   } catch (error) {
     console.warn('解析响应体失败', error)
-    return props.csn.value.reqBody
+    return props.csn.value?.reqBody ?? ''
   }
 })
 
@@ -23,7 +23,7 @@ const resBody = computed(() => {
     return JSON.parse(props.csn.resBody)
   } catch (error) {
     console.warn('解析响应体失败', error)
-    return props.csn.resBody
+    return props.csn?.resBody ?? ''
   }
 })
 

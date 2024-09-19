@@ -1,29 +1,26 @@
 <script setup lang="ts">
 import { advancedSplit } from '@/utils/log';
 import useLogStore from '../../../stores/log';
-import { computed, onMounted, onUnmounted, reactive, ref, watch } from 'vue';
-
+import { onMounted, onUnmounted, reactive, ref, watch } from 'vue';
 
 const logStore = useLogStore();
 const filters = reactive({ isCaseSensitive: false });
-const timer = ref<NodeJS.Timeout | null>(null)
-const props = defineProps<{ tabId: string }>()
-const searchText = ref('')
-const contentDiv = ref<HTMLElement | null>(null)
-const textArea = ref<HTMLTextAreaElement | null>(null)
-const isFocus = ref(false)
-const command = ref<string | null>(null)
+const timer = ref<NodeJS.Timeout | null>(null);
+const props = defineProps<{ tabId: string }>();
+const searchText = ref('');
+const contentDiv = ref<HTMLElement | null>(null);
+const textArea = ref<HTMLTextAreaElement | null>(null);
+const isFocus = ref(false);
+const command = ref<string | null>(null);
 
 const onFocus = () => {
   isFocus.value = true;
-
-}
+};
 const onBlur = () => {
   isFocus.value = false;
-}
+};
 
-
-const resizeObserver = new ResizeObserver(entries => {
+const resizeObserver = new ResizeObserver((entries) => {
   for (let entry of entries) {
     if (entry.target === contentDiv.value && textArea.value) {
       textArea.value.style.height = `${entry.contentRect.height}px`;
@@ -31,11 +28,10 @@ const resizeObserver = new ResizeObserver(entries => {
   }
 });
 
-
 function processString(input: string): (string | string[])[] {
   const parts = advancedSplit(input);
 
-  return parts.map(part => {
+  return parts.map((part) => {
     if (part.includes(':')) {
       return part.split(':');
     } else {
@@ -44,89 +40,88 @@ function processString(input: string): (string | string[])[] {
   });
 }
 
-
 watch(searchText, () => {
   // 将字符串处理成数组，如：123:234 sdd a:123 得到的结果为：[[123, 234], sdd, [a, 123]]
-  const result = processString(searchText.value)
-  contentDiv.value.innerHTML = result.map(item => {
-    if (Array.isArray(item)) {
-      return `<span class="group-text">${item[0]}:<span class="group-value">${item[1]}</span></span>`;
-    } else {
-      return item;
-    }
-  }).join(' ');
+  const result = processString(searchText.value);
+  contentDiv.value.innerHTML = result
+    .map((item) => {
+      if (Array.isArray(item)) {
+        return `<span class="group-text">${item[0]}:<span class="group-value">${item[1]}</span></span>`;
+      } else {
+        return item;
+      }
+    })
+    .join(' ');
   const size = searchText.value.length;
-  if (searchText.value[size - 1] === ":") {
-    const lastSpaceIndex = searchText.value.lastIndexOf(" ")
-    command.value = searchText.value.substring(lastSpaceIndex + 1, size - 1)
+  if (searchText.value[size - 1] === ':') {
+    const lastSpaceIndex = searchText.value.lastIndexOf(' ');
+    command.value = searchText.value.substring(lastSpaceIndex + 1, size - 1);
   } else {
-    command.value = null
+    command.value = null;
   }
-})
+});
 
 const onSearch = () => {
   logStore.updateSearchFilterByTabId(props.tabId, {
     text: searchText.value,
-    isCaseSensitive: filters.isCaseSensitive
-  })
-}
+    isCaseSensitive: filters.isCaseSensitive,
+  });
+};
 
 const onSwapCaseSensitivity = () => {
-  filters.isCaseSensitive = !filters.isCaseSensitive
-  onSearch()
-}
+  filters.isCaseSensitive = !filters.isCaseSensitive;
+  onSearch();
+};
 
 const clearTimer = () => {
   if (timer.value) {
-    clearTimeout(timer.value)
+    clearTimeout(timer.value);
   }
-}
+};
 watch(searchText, (val) => {
-  clearTimer()
+  clearTimer();
   if (!val) {
     onSearch();
   } else {
-    timer.value = setTimeout(onSearch, 500)
+    timer.value = setTimeout(onSearch, 500);
   }
 });
-
 
 const onTag = (key: string) => {
   const size = searchText.value.length;
   const lastWord = searchText.value[size - 1];
   if (lastWord === ' ' || lastWord === undefined) {
-    searchText.value += `${key}:`
+    searchText.value += `${key}:`;
   } else {
-    searchText.value += ` ${key}:`
+    searchText.value += ` ${key}:`;
   }
-}
+};
 
 const onTagValue = (val: string) => {
-  searchText.value += `"${val}" `
-}
+  searchText.value += `"${val}" `;
+};
 
-onUnmounted(clearTimer)
+onUnmounted(clearTimer);
 
 onMounted(() => {
   if (contentDiv.value) {
     resizeObserver.observe(contentDiv.value);
   }
   if (textArea.value) {
-    textArea.value.addEventListener("keydown", (event) => {
+    textArea.value.addEventListener('keydown', (event) => {
       if (event.key === 'Enter' && !event.shiftKey) {
-        onSearch()
+        onSearch();
       }
       if (event.key === 'Enter') {
         event.preventDefault(); // 阻止默认的换行行为
       }
-    })
+    });
   }
 });
 
 onUnmounted(() => {
   resizeObserver.disconnect();
-})
-
+});
 </script>
 
 <template>
@@ -134,21 +129,43 @@ onUnmounted(() => {
     <div class="input-container">
       <div :class="{ 'input-box': true, 'input-box-focus': isFocus }">
         <div class="input-content" ref="contentDiv" />
-        <textarea ref="textArea" v-on:blur="onBlur" v-on:focus="onFocus" v-model="searchText" placeholder="请输入搜索内容"
-          class="input-item"></textarea>
+        <textarea
+          ref="textArea"
+          v-on:blur="onBlur"
+          v-on:focus="onFocus"
+          v-model="searchText"
+          placeholder="请输入搜索内容"
+          class="input-item"
+        ></textarea>
       </div>
-      <div class="tip-box" v-if="isFocus &&  Object.keys(logStore.keyValues).length > 0" @mousedown.prevent>
+      <div
+        class="tip-box"
+        v-if="isFocus && Object.keys(logStore.keyValues).length > 0"
+        @mousedown.prevent
+      >
         <div class="label-box">
           <template v-if="command === null">
             <span class="title-box">标签</span>
             <div class="tag-container">
-              <span class="tag-text" v-for="key in Object.keys(logStore.keyValues)" @click="onTag(key)">{{ key }}</span>
+              <span
+                class="tag-text"
+                v-for="key in Object.keys(logStore.keyValues)"
+                @click="onTag(key)"
+              >
+                {{ key }}
+              </span>
             </div>
           </template>
           <template v-if="command">
-            <span class="title-box">标签（{{command}}）对应的值</span>
+            <span class="title-box">标签（{{ command }}）对应的值</span>
             <div class="tag-container">
-              <span class="tag-text" v-for="value of logStore.keyValues[command]" @click="onTagValue(value)">{{ value }}</span>
+              <span
+                class="tag-text"
+                v-for="value of logStore.keyValues[command]"
+                @click="onTagValue(value)"
+              >
+                {{ value }}
+              </span>
             </div>
           </template>
         </div>
@@ -156,12 +173,21 @@ onUnmounted(() => {
     </div>
     <a-tooltip>
       <template #title>忽略大小写</template>
-      <div :class="{
-        'case-sensitivity-container': true,
-        'case-sensitivity-container-selected': filters.isCaseSensitive,
-      }" @click="onSwapCaseSensitivity">
-        <img src="../../../assets/images/case-sensitivity.svg"
-          :class="{ 'case-sensitivity': true, 'selected-case-sensitivity': filters.isCaseSensitive }" alt="" />
+      <div
+        :class="{
+          'case-sensitivity-container': true,
+          'case-sensitivity-container-selected': filters.isCaseSensitive,
+        }"
+        @click="onSwapCaseSensitivity"
+      >
+        <img
+          src="../../../assets/images/case-sensitivity.svg"
+          :class="{
+            'case-sensitivity': true,
+            'selected-case-sensitivity': filters.isCaseSensitive,
+          }"
+          alt=""
+        />
       </div>
     </a-tooltip>
   </div>
@@ -200,9 +226,6 @@ onUnmounted(() => {
   filter: drop-shadow(100px 0 0 #fff);
 }
 
-
-
-
 .input-box {
   width: 100%;
   align-items: center;
@@ -232,7 +255,7 @@ onUnmounted(() => {
   margin-bottom: -1px;
   background: transparent;
   font-size: 14px;
-  font-family: "新宋体 Console";
+  font-family: '新宋体 Console';
   caret-color: black;
   color: transparent;
   overflow: hidden;
@@ -245,7 +268,7 @@ onUnmounted(() => {
   white-space: pre-wrap;
   word-break: break-word;
   line-height: 25px;
-  font-family: "新宋体 Console";
+  font-family: '新宋体 Console';
   font-size: 14px;
   min-height: 25px;
   height: auto;
@@ -265,19 +288,18 @@ onUnmounted(() => {
   height: 0px;
 }
 
-
 .group-text {
   background: rgba(60, 116, 221, 0.1);
   padding: 0px;
 }
 
 .group-value {
-  color: #3C74DD;
+  color: #3c74dd;
 }
 
 .tip-box {
   position: absolute;
-  width: 50%;
+  max-width: 80%;
   background-color: #fff;
   border-radius: 8px;
   z-index: 99;
@@ -286,7 +308,6 @@ onUnmounted(() => {
   gap: 20px;
   box-shadow: rgba(0, 0, 0, 0.2) 0px 0px 10px;
   padding-bottom: 10px;
-  /* top: 50px; */
 }
 
 .label-box {
@@ -303,9 +324,11 @@ onUnmounted(() => {
 
 .tag-container {
   margin-left: 20px;
+  margin-right: 20px;
   display: flex;
   flex-direction: row;
   gap: 10px;
+  overflow: auto;
 }
 
 .tag-text {

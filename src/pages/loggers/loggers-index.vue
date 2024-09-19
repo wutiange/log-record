@@ -5,6 +5,7 @@ import useLogStore from '../../stores/log';
 import { message } from 'ant-design-vue';
 import ClearIcon from '@/assets/images/clear-icon.vue';
 import ScrollToEndIcon from '@/assets/images/scroll-to-end-icon.vue';
+import { onBeforeRouteLeave } from 'vue-router';
 
 const logStore = useLogStore();
 const open = ref<boolean>(false);
@@ -53,13 +54,28 @@ onMounted(() => {
     logStore.updateTabOperaHistory(tabId);
   }
 });
+
+onBeforeRouteLeave(() => {
+  logStore.setTabIsScrollToBottomByTabId(false);
+});
 </script>
 
 <template>
   <div class="loggers-container">
-    <a-tabs v-model:activeKey="logStore.currentShowTabId" @change="onChange" type="editable-card" @edit="onEdit"
-      class="tabs" :tabBarGutter="10">
-      <a-tab-pane class="tab-pane" v-for="tabIdObj in logStore.tabIds" :key="tabIdObj.tabId" :tab="tabIdObj.title">
+    <a-tabs
+      v-model:activeKey="logStore.currentShowTabId"
+      @change="onChange"
+      type="editable-card"
+      @edit="onEdit"
+      class="tabs"
+      :tabBarGutter="10"
+    >
+      <a-tab-pane
+        class="tab-pane"
+        v-for="tabIdObj in logStore.tabIds"
+        :key="tabIdObj.tabId"
+        :tab="tabIdObj.title"
+      >
         <PickingArea :tab-id="tabIdObj.tabId" />
       </a-tab-pane>
     </a-tabs>
@@ -70,11 +86,20 @@ onMounted(() => {
       </a-tooltip>
       <a-tooltip>
         <template #title>会跟随日志滚动</template>
-        <ScrollToEndIcon class="custom-icon" alt="跟随滚动" @click="onFollowScrolling"
-          :class="{ 'img-select': logStore.isScrollToBottom }" />
+        <ScrollToEndIcon
+          class="custom-icon"
+          alt="跟随滚动"
+          @click="onFollowScrolling"
+          :class="{ 'img-select': logStore.isScrollToBottom }"
+        />
       </a-tooltip>
     </div>
-    <a-modal v-model:open="tabNameVisible" title="新增Tab" @ok="onConfirm" :closable="false">
+    <a-modal
+      v-model:open="tabNameVisible"
+      title="新增Tab"
+      @ok="onConfirm"
+      :closable="false"
+    >
       <a-input v-model:value="tabName" placeholder="请输入Tab名称" />
     </a-modal>
   </div>
@@ -113,7 +138,6 @@ onMounted(() => {
   overflow: hidden;
   height: 45px;
 }
-
 
 .custom-icon {
   width: 25px;

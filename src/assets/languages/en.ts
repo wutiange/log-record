@@ -38,4 +38,12 @@ export default {
   '无法复制文本: ': 'Unable to copy text: ',
   '请输入路径或 url': 'Enter path or URL',
   '请求方法：': 'Request Method:',
+  连接说明: 'Connection Instructions',
+  知道了: 'Got it',
+  '1. 请在需要调试的手机上写上这个 IP 地址：':
+    '1. Enter this IP address on the phone you want to debug: ',
+  '2. 请保证你调试的手机和这个 ip 地址处于同一个局域网；':
+    "2. Ensure that the phone you're debugging and this IP address are on the same local network;",
+  '3. 如果还是不行，请检查你手机/电脑是否开了代理，如果有请先关闭。':
+    "3. If it still doesn't work, check if your phone or computer has a proxy enabled. If so, please disable it.",
 };

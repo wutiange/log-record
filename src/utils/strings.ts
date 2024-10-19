@@ -1,4 +1,3 @@
-
 export function convertAndSortRecord(record: Record<string, number>) {
   // 将对象转换为{key: number, value: number}格式的数组
   const array = Object.keys(record).map((key) => ({
@@ -12,7 +11,11 @@ export function convertAndSortRecord(record: Record<string, number>) {
   return array;
 }
 
-export function findAllSubstringIndices(str: string, searchStr: string, ignored = false) {
+export function findAllSubstringIndices(
+  str: string,
+  searchStr: string,
+  ignored = false,
+) {
   let startIndex = 0;
   let index;
   const indices: Record<string, number> = {};
@@ -24,46 +27,51 @@ export function findAllSubstringIndices(str: string, searchStr: string, ignored 
   return indices;
 }
 
-
-export function indexOf(str: string, searchText: string, startIndex: number, ignored = false) {
+export function indexOf(
+  str: string,
+  searchText: string,
+  startIndex: number,
+  ignored = false,
+) {
   if (ignored) {
-    return str.toLocaleLowerCase().indexOf(searchText.toLocaleLowerCase(), startIndex)
+    return str
+      .toLocaleLowerCase()
+      .indexOf(searchText.toLocaleLowerCase(), startIndex);
   }
-  return str.indexOf(searchText, startIndex)
+  return str.indexOf(searchText, startIndex);
 }
 
-export function replaceSubstring (
+export function replaceSubstring(
   str: string,
   index: number,
   length: number,
-  replacement: string
+  replacement: string,
 ) {
   // 使用slice获取起始部分和结束部分，然后将它们与替换字符串拼接
   return str.slice(0, index) + replacement + str.slice(index + length);
 }
-
 
 export function trimQuotesAndUnescape(input: string): string {
   // 处理双引号的情况
   if (input.startsWith('"') && input.endsWith('"')) {
     return input.slice(1, -1);
   }
-  
+
   // 处理单引号的情况
   if (input.startsWith("'") && input.endsWith("'")) {
     return input.slice(1, -1);
   }
-  
+
   // 处理转义双引号的情况
   if (input.startsWith('\\"') && input.endsWith('\\"')) {
     return '"' + input.slice(2, -2) + '"';
   }
-  
+
   // 处理转义单引号的情况
   if (input.startsWith("\\'") && input.endsWith("\\'")) {
     return "'" + input.slice(2, -2) + "'";
   }
-  
+
   // 其他情况保持不变
   return input;
 }
@@ -77,14 +85,18 @@ export function parseUrl(url: string): string[] {
     const domain = `${parsedUrl.protocol}//${parsedUrl.hostname}`;
 
     // 分割路径
-    const pathSegments = parsedUrl.pathname.split('/').filter(segment => segment !== '');
+    const pathSegments = parsedUrl.pathname
+      .split('/')
+      .filter((segment) => segment !== '');
 
     // 获取查询字符串（如果存在）
     const queryString = parsedUrl.search ? parsedUrl.search.slice(1) : '';
 
     // 合并最后一个路径段和查询字符串（如果存在）
     const lastSegment = pathSegments.pop() || '';
-    const lastElement = queryString ? `${lastSegment}?${queryString}` : lastSegment;
+    const lastElement = queryString
+      ? `${lastSegment}?${queryString}`
+      : lastSegment;
 
     // 构建结果数组
     const result = [domain, ...pathSegments];

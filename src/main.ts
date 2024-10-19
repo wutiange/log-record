@@ -3,6 +3,7 @@ import path from 'path';
 import serverClient from './server';
 import { checkForUpgrade } from './utils/update';
 import { name, author, version } from '../package.json';
+import { getIPAddress } from './utils/node-strings';
 
 const createWindow = () => {
   // Create the browser window.
@@ -24,6 +25,7 @@ const createWindow = () => {
   });
 
   ipcMain.handle('toggleDevTools', () => mainWindow.webContents.openDevTools());
+  ipcMain.handle('getIPAddress', () => getIPAddress());
   ipcMain.handle('checkIsUpdate', () =>
     checkForUpgrade(author.name, name, version),
   );

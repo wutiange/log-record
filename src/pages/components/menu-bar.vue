@@ -4,14 +4,16 @@ import { useRouter } from 'vue-router';
 import { SettingOutlined } from '@ant-design/icons-vue'
 import { version } from '../../../package.json'
 import useAppStore from '@/stores/app';
+import { useI18n } from 'vue-i18n';
 const router = useRouter()
 const appStore = useAppStore()
 const openUpdate = ref(false)
+const i18n = useI18n()
 const funcs = reactive([
   // @ts-ignore
-  { img: new URL('../../assets/images/log.svg', import.meta.url).href, path: '/log', text: '日志' },
+  { img: new URL('../../assets/images/log.svg', import.meta.url).href, path: '/log', text: i18n.t('日志') },
   // @ts-ignore
-  { img: new URL('../../assets/images/network.svg', import.meta.url).href, path: '/network', text: '网络' },
+  { img: new URL('../../assets/images/network.svg', import.meta.url).href, path: '/network', text: i18n.t('网络') },
 ]);
 const selectedObj = reactive<Record<string, boolean>>({
   '/log': true,
@@ -67,20 +69,22 @@ const onUpdate = () => {
     <a-popover :arrow="false" class="setting-box" trigger="click" placement="rightTop">
       <template #content>
         <p>
-          <a-button @click="toggleDevTools" type="text">调试器（Alt + Shift + F12）</a-button>
+          <a-button @click="toggleDevTools" type="text">{{ $t('调试器（Alt + Shift + F12）') }}</a-button>
         </p>
-        <a-button @click="checkIsUpdate" type="text">检查更新</a-button>
-        <p class="version" type="text">版本号：v{{ version }}<span class="have-update-text"
+        <a-button @click="checkIsUpdate" type="text">{{ $t('检查更新') }}</a-button>
+        <p class="version" type="text">{{ $t('版本号：v{version}', { version }) }}<span class="have-update-text"
             v-if="appStore.updateResult.hasUpgrade">-->{{ appStore.updateResult.latestVersion ?? '' }}</span></p>
       </template>
       <a-badge :dot="appStore.updateResult.hasUpgrade">
         <SettingOutlined class="setting-icon" />
       </a-badge>
     </a-popover>
-    <a-modal v-model:open="openUpdate" title="更新内容" ok-text="去下载" cancel-text="取消" @ok="onUpdate">
-      <p class="dialog-version">最新版本号：v{{ appStore.updateResult.latestVersion }}</p>
+    <a-modal v-model:open="openUpdate" :title="$t('更新内容')" :ok-text="$t('去下载')" :cancel-text="$t('取消')" @ok="onUpdate">
+      <p class="dialog-version">{{ $t('最新版本号：v{latestVersion}', { latestVersion: appStore.updateResult.latestVersion })
+        }}
+      </p>
       <div>
-        更新内容：<p class="update-content">{{ appStore.updateResult?.releaseDetails?.body ?? '' }}</p>
+        {{ $t('更新内容：') }}<p class="update-content">{{ appStore.updateResult?.releaseDetails?.body ?? '' }}</p>
       </div>
     </a-modal>
   </div>

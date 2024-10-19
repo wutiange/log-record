@@ -6,7 +6,9 @@ import { message } from 'ant-design-vue';
 import ClearIcon from '@/assets/images/clear-icon.vue';
 import ScrollToEndIcon from '@/assets/images/scroll-to-end-icon.vue';
 import { onBeforeRouteLeave } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 
+const i18n = useI18n();
 const logStore = useLogStore();
 const open = ref<boolean>(false);
 const tabNameVisible = ref<boolean>(false);
@@ -14,6 +16,7 @@ const tabName = ref('');
 const showDrawer = () => {
   open.value = true;
 };
+
 
 const onClearLog = () => {
   logStore.clearLoggers();
@@ -37,7 +40,7 @@ const onChange = (targetKey: string) => {
 
 const onConfirm = () => {
   if (!tabName.value) {
-    message.warning('名称不能马虎，至少写一个');
+    message.warning(i18n.t('名称不能马虎，至少写一个'));
     return;
   }
   const tabId = logStore.allocateID(tabName.value);
@@ -50,7 +53,7 @@ watch(() => logStore.currentItem, showDrawer);
 
 onMounted(() => {
   if (!logStore.currentShowTabId) {
-    const tabId = logStore.allocateID('默认');
+    const tabId = logStore.allocateID(i18n.t('默认'));
     logStore.updateTabOperaHistory(tabId);
   }
 });
@@ -62,45 +65,25 @@ onBeforeRouteLeave(() => {
 
 <template>
   <div class="loggers-container">
-    <a-tabs
-      v-model:activeKey="logStore.currentShowTabId"
-      @change="onChange"
-      type="editable-card"
-      @edit="onEdit"
-      class="tabs"
-      :tabBarGutter="10"
-    >
-      <a-tab-pane
-        class="tab-pane"
-        v-for="tabIdObj in logStore.tabIds"
-        :key="tabIdObj.tabId"
-        :tab="tabIdObj.title"
-      >
+    <a-tabs v-model:activeKey="logStore.currentShowTabId" @change="onChange" type="editable-card" @edit="onEdit"
+      class="tabs" :tabBarGutter="10">
+      <a-tab-pane class="tab-pane" v-for="tabIdObj in logStore.tabIds" :key="tabIdObj.tabId" :tab="tabIdObj.title">
         <PickingArea :tab-id="tabIdObj.tabId" />
       </a-tab-pane>
     </a-tabs>
     <div class="related-operation">
       <a-tooltip>
-        <template #title>会把当前显示的日志清除</template>
+        <template #title>{{ $t('会把当前显示的日志清除') }}</template>
         <ClearIcon class="custom-icon" @click="onClearLog" />
       </a-tooltip>
       <a-tooltip>
-        <template #title>会跟随日志滚动</template>
-        <ScrollToEndIcon
-          class="custom-icon"
-          alt="跟随滚动"
-          @click="onFollowScrolling"
-          :class="{ 'img-select': logStore.isScrollToBottom }"
-        />
+        <template #title>{{ $t('会跟随日志滚动') }}</template>
+        <ScrollToEndIcon class="custom-icon" :alt="$t('跟随滚动')" @click="onFollowScrolling"
+          :class="{ 'img-select': logStore.isScrollToBottom }" />
       </a-tooltip>
     </div>
-    <a-modal
-      v-model:open="tabNameVisible"
-      title="新增Tab"
-      @ok="onConfirm"
-      :closable="false"
-    >
-      <a-input v-model:value="tabName" placeholder="请输入Tab名称" />
+    <a-modal v-model:open="tabNameVisible" :title="$t('新增Tab')" @ok="onConfirm" :closable="false">
+      <a-input v-model:value="tabName" :placeholder="$t('请输入Tab名称')" />
     </a-modal>
   </div>
 </template>
@@ -147,6 +130,7 @@ onBeforeRouteLeave(() => {
   box-sizing: content-box;
   outline: none;
 }
+
 .custom-icon:hover {
   background-color: var(--color-main);
   cursor: pointer;

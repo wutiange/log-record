@@ -1,20 +1,22 @@
-import './assets/main.css'
+import './assets/main.css';
 
-import { createApp } from 'vue'
-import { createPinia } from 'pinia'
+import { createApp } from 'vue';
+import { createPinia } from 'pinia';
 import 'ant-design-vue/dist/reset.css';
 import Antd from 'ant-design-vue';
-import App from './pages/App.vue'
-import router from './router'
+import App from './pages/App.vue';
+import router from './router';
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
-import VueVirtualScroller from 'vue-virtual-scroller'
-import 'vue-virtual-scroller/dist/vue-virtual-scroller.css'
+import VueVirtualScroller from 'vue-virtual-scroller';
+import 'vue-virtual-scroller/dist/vue-virtual-scroller.css';
+import i18n from './assets/languages';
 
-const app = createApp(App)
-app.use(Antd)
-app.use(createPinia())
-app.use(router)
-app.use(VueVirtualScroller)
+const app = createApp(App);
+app.use(i18n);
+app.use(Antd);
+app.use(createPinia());
+app.use(router);
+app.use(VueVirtualScroller);
 
-app.mount('#app')
+app.mount('#app');

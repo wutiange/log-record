@@ -6,14 +6,15 @@ const networkStore = useNetworkStore()
 </script>
 <template>
   <div class="search-container">
-    <a-textarea class="search-box" v-model:value="networkStore.searchFilter.text" placeholder="请输入路径或 url " auto-size />
+    <a-textarea class="search-box" v-model:value="networkStore.searchFilter.text" :placeholder="$t('请输入路径或 url')"
+      auto-size />
     <a-tooltip>
-      <template #title>忽略大小写</template>
+      <template #title>{{ $t('忽略大小写') }}</template>
       <div :class="{
         'case-sensitivity-container': true,
         'case-sensitivity-container-selected': networkStore.searchFilter.isCaseSensitive,
       }" @click="networkStore.setSearchFilter({ isCaseSensitive: !networkStore.searchFilter.isCaseSensitive })">
-          <CaseSensitivity class="custom-icon" />
+        <CaseSensitivity class="custom-icon" />
       </div>
     </a-tooltip>
   </div>
@@ -27,6 +28,7 @@ const networkStore = useNetworkStore()
   margin: 10px;
   width: 100%;
 }
+
 :deep(.search-box) {
   width: 60%;
   line-height: 25px;
@@ -53,5 +55,4 @@ const networkStore = useNetworkStore()
   box-sizing: content-box;
   outline: none;
 }
-
 </style>

@@ -129,41 +129,23 @@ onUnmounted(() => {
     <div class="input-container">
       <div :class="{ 'input-box': true, 'input-box-focus': isFocus }">
         <div class="input-content" ref="contentDiv" />
-        <textarea
-          ref="textArea"
-          v-on:blur="onBlur"
-          v-on:focus="onFocus"
-          v-model="searchText"
-          placeholder="请输入搜索内容"
-          class="input-item"
-        ></textarea>
+        <textarea ref="textArea" v-on:blur="onBlur" v-on:focus="onFocus" v-model="searchText"
+          :placeholder="$t('请输入搜索内容')" class="input-item"></textarea>
       </div>
-      <div
-        class="tip-box"
-        v-if="isFocus && Object.keys(logStore.keyValues).length > 0"
-        @mousedown.prevent
-      >
+      <div class="tip-box" v-if="isFocus && Object.keys(logStore.keyValues).length > 0" @mousedown.prevent>
         <div class="label-box">
           <template v-if="command === null">
-            <span class="title-box">标签</span>
+            <span class="title-box">{{ $t('标签') }}</span>
             <div class="tag-container">
-              <span
-                class="tag-text"
-                v-for="key in Object.keys(logStore.keyValues)"
-                @click="onTag(key)"
-              >
+              <span class="tag-text" v-for="key in Object.keys(logStore.keyValues)" @click="onTag(key)">
                 {{ key }}
               </span>
             </div>
           </template>
           <template v-if="command">
-            <span class="title-box">标签（{{ command }}）对应的值</span>
+            <span class="title-box">{{ $t('标签（{command}）对应的值', { command: command }) }}</span>
             <div class="tag-container">
-              <span
-                class="tag-text"
-                v-for="value of logStore.keyValues[command]"
-                @click="onTagValue(value)"
-              >
+              <span class="tag-text" v-for="value of logStore.keyValues[command]" @click="onTagValue(value)">
                 {{ value }}
               </span>
             </div>
@@ -172,22 +154,15 @@ onUnmounted(() => {
       </div>
     </div>
     <a-tooltip>
-      <template #title>忽略大小写</template>
-      <div
-        :class="{
-          'case-sensitivity-container': true,
-          'case-sensitivity-container-selected': filters.isCaseSensitive,
-        }"
-        @click="onSwapCaseSensitivity"
-      >
-        <img
-          src="../../../assets/images/case-sensitivity.svg"
-          :class="{
-            'case-sensitivity': true,
-            'selected-case-sensitivity': filters.isCaseSensitive,
-          }"
-          alt=""
-        />
+      <template #title>{{ $t('忽略大小写') }}</template>
+      <div :class="{
+        'case-sensitivity-container': true,
+        'case-sensitivity-container-selected': filters.isCaseSensitive,
+      }" @click="onSwapCaseSensitivity">
+        <img src="@/assets/images/case-sensitivity.svg" :class="{
+          'case-sensitivity': true,
+          'selected-case-sensitivity': filters.isCaseSensitive,
+        }" alt="" />
       </div>
     </a-tooltip>
   </div>

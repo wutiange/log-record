@@ -5,7 +5,7 @@ const platform = window.electronAPI.platform
 <template>
   <div class="nav-bar-container">
     <img v-if="platform !== 'darwin'" src="../../assets/logo.svg" class="logo" alt="" />
-    <span class="title">日志系统</span>
+    <span class="title">{{ $t('日志系统') }}</span>
   </div>
 </template>
 

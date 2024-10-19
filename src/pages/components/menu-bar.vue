@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref, watch } from 'vue';
+import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { SettingOutlined } from '@ant-design/icons-vue'
 import { version } from '../../../package.json'
@@ -51,6 +51,17 @@ watch(() => appStore.updateResult.hasUpgrade, () => {
   }
 })
 
+const updateContent = computed(() => {
+  const body = appStore.updateResult?.releaseDetails?.body ?? ''
+  try {
+    const bodyObj = JSON.parse(body)
+    return bodyObj[i18n.locale.value].join("\n")
+  } catch (error) {
+    console.warn("在得到更新内容的地方出现了错误---", error)
+    return body
+  }
+})
+
 const onUpdate = () => {
   if (!appStore.updateResult?.releaseDetails?.html_url) {
     return
@@ -98,7 +109,7 @@ const onConnectIns = () => {
         }}
       </p>
       <div>
-        {{ $t('更新内容：') }}<p class="update-content">{{ appStore.updateResult?.releaseDetails?.body ?? '' }}</p>
+        {{ $t('更新内容：') }}<p class="update-content">{{ updateContent }}</p>
       </div>
     </a-modal>
     <a-modal v-model:open="isShowConnect" :title="$t('连接说明')" :ok-text="$t('知道了')" :cancel-text="$t('取消')"

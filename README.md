@@ -79,4 +79,4 @@ Here, `level` represents the reported field name, and `warn` represents the corr
 - [x] Optimize performance issues with too many network logs, improve experience (1.0.8);
 - [x] Add network log search (1.0.8);
 - [ ] Add connection prompt for Log Record system (1.0.9);
-- [ ] Add English version (1.1.0);
+- [x] Add English version (1.0.9);

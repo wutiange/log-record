@@ -31,7 +31,7 @@ const filterTreeData = computed(() => {
               <template #title="{ title, isLeaf, statusCodeKey, statusCode }">
                 <span v-if="isLeaf">
                   <a-tag v-if="statusCodeKey === 'processing'">
-                    <clock-circle-outlined  :spin="true" />
+                    <clock-circle-outlined :spin="true" />
                   </a-tag>
                   <a-tag v-else :color="statusCodeKey">
                     {{ statusCode }}
@@ -71,6 +71,7 @@ const filterTreeData = computed(() => {
 :deep(.ant-tree-treenode-selected) {
   background: var(--color-main);
 }
+
 :deep(.ant-tree-treenode-selected::before) {
   background: none !important;
 }
@@ -87,7 +88,6 @@ const filterTreeData = computed(() => {
 }
 
 .content {
-  padding: 15px;
   margin: 10px;
   height: 100%;
   border-radius: var(--border-radius-large);
@@ -95,7 +95,6 @@ const filterTreeData = computed(() => {
   overflow: auto;
   display: flex;
   flex-direction: column;
-  background-color: var(--color-background)
 }
 
 .content::-webkit-scrollbar {
@@ -114,6 +113,8 @@ const filterTreeData = computed(() => {
 
 .content-left {
   gap: 10px;
+  padding: 15px;
+  background-color: var(--color-background)
 }
 
 .network-record {

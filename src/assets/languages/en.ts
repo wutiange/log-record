@@ -37,4 +37,5 @@ export default {
   解析响应体失败: 'Failed to parse response body',
   '无法复制文本: ': 'Unable to copy text: ',
   '请输入路径或 url': 'Enter path or URL',
+  '请求方法：': 'Request Method:',
 };

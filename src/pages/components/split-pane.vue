@@ -81,5 +81,4 @@ export default {
   background-color: var(--color-scroll);
   cursor: col-resize;
 }
-
 </style>

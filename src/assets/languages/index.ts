@@ -9,8 +9,6 @@ function getBrowserLanguage() {
   return navigator.language || navigator.userLanguage;
 }
 
-console.log(getBrowserLanguage());
-
 const i18n = createI18n({
   locale: getBrowserLanguage(),
   fallbackLocale: 'en-US',

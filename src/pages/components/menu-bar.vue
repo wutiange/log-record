@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, reactive, ref, watch } from 'vue';
+import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { SettingOutlined } from '@ant-design/icons-vue'
 import { version } from '../../../package.json'
@@ -51,6 +51,21 @@ watch(() => appStore.updateResult.hasUpgrade, () => {
   }
 })
 
+const updateContent = computed(() => {
+  const body = appStore.updateResult?.releaseDetails?.body ?? ''
+  try {
+    const bodyObj = JSON.parse(body)
+    return bodyObj[i18n.locale.value].join("\n")
+  } catch (error) {
+    console.warn("在得到更新内容的地方出现了错误---", error)
+    return body
+  }
+})
+
+const latestVersion = computed(() => {
+  return appStore.updateResult?.latestVersion ?? ''
+})
+
 const onUpdate = () => {
   if (!appStore.updateResult?.releaseDetails?.html_url) {
     return
@@ -97,18 +112,14 @@ const onConnectIns = () => {
         </a-badge>
       </a-popover>
     </div>
-    <div ref="updateContent" class="update-content">
-      <a-modal :getContainer="() => $refs.updateContent" v-model:open="openUpdate" :title="$t('更新内容')"
+    <div ref="updateContentTip" class="update-content-tip">
+      <a-modal :getContainer="() => $refs.updateContentTip" v-model:open="openUpdate" :title="$t('更新内容')"
         :ok-text="$t('去下载')" :cancel-text="$t('取消')" @ok="onUpdate">
-        <p class="dialog-version">{{ $t('最新版本号：v{latestVersion}', {
-          latestVersion: appStore.updateResult.latestVersion
-        })
-          }}
+        <p class="dialog-version">{{ $t('最新版本号：v{latestVersion}', { latestVersion }) }}
         </p>
-        <p>
-          {{ $t('更新内容：') }}
-        <p class="update-content">{{ appStore.updateResult?.releaseDetails?.body ?? '' }}</p>
-        </p>
+        <div>
+          {{ $t('更新内容：') }}<p class="update-content">{{ updateContent }}</p>
+        </div>
       </a-modal>
     </div>
 
@@ -255,7 +266,8 @@ p {
   color: var(--color-text);
 }
 
-.update-content p {
+.update-content-tip p,
+div {
   color: var(--color-text);
 }
 </style>

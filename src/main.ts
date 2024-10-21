@@ -19,11 +19,7 @@ const createWindow = () => {
     width: 1200,
     height: 600,
     titleBarStyle: 'hidden',
-    titleBarOverlay: {
-      color: nativeTheme.shouldUseDarkColors ? '#1a1a1a' : '#ffffff',
-      symbolColor: nativeTheme.shouldUseDarkColors ? '#66cccc' : '#336666',
-      height: 38,
-    },
+    titleBarOverlay: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
       spellcheck: false,
@@ -31,6 +27,23 @@ const createWindow = () => {
     transparent: true,
     icon: path.join(__dirname, '/assets/logo.png'),
   });
+
+  // 设置标题栏颜色
+  function updateTitleBarOverlay() {
+    mainWindow.setTitleBarOverlay({
+      color: nativeTheme.shouldUseDarkColors ? '#181818' : '#ffffff',
+      symbolColor: nativeTheme.shouldUseDarkColors
+        ? 'rgba(235, 235, 235, 0.64)'
+        : '#2c3e50',
+      height: 38,
+    });
+  }
+
+  // 初始设置
+  updateTitleBarOverlay();
+
+  // 监听主题变化
+  nativeTheme.on('updated', updateTitleBarOverlay);
 
   ipcMain.handle('toggleDevTools', () => mainWindow.webContents.openDevTools());
   ipcMain.handle('getIPAddress', () => getIPAddress());

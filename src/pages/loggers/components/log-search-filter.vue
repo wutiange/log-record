@@ -231,8 +231,8 @@ onUnmounted(() => {
   background: transparent;
   font-size: 14px;
   font-family: '新宋体 Console';
-  caret-color: black;
-  color: transparent;
+  caret-color: var(--color-text);
+  color: var(--color-text);
   overflow: hidden;
   overflow-wrap: break-word;
 }

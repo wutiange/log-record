@@ -82,9 +82,12 @@ onBeforeRouteLeave(() => {
           :class="{ 'img-select': logStore.isScrollToBottom }" />
       </a-tooltip>
     </div>
-    <a-modal v-model:open="tabNameVisible" :title="$t('新增Tab')" @ok="onConfirm" :closable="false">
-      <a-input v-model:value="tabName" :placeholder="$t('请输入Tab名称')" />
-    </a-modal>
+    <div ref="mod">
+      <a-modal v-model:open="tabNameVisible" :getContainer="() => $refs.mod" :title="$t('新增Tab')" @ok="onConfirm"
+        :closable="false">
+        <a-input v-model:value="tabName" :placeholder="$t('请输入Tab名称')" />
+      </a-modal>
+    </div>
   </div>
 </template>
 
@@ -110,6 +113,40 @@ onBeforeRouteLeave(() => {
 
 .tabs :deep(.ant-tabs-content) {
   height: 100%;
+}
+
+:deep(.ant-modal-content) {
+  background-color: var(--color-background-soft);
+
+  .ant-modal-title {
+    color: red;
+  }
+}
+
+:deep(.ant-modal-title) {
+  background-color: var(--color-background-soft);
+  color: var(--color-text)
+}
+
+:deep(.ant-input) {
+  background-color: var(--color-background);
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+
+:deep(.ant-input::placeholder) {
+  color: var(--color-border);
+}
+
+:deep(.ant-btn-default) {
+  background-color: var(--color-background);
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+
+:deep(.ant-btn-primary) {
+  background-color: var(--color-main);
+  color: var(--color-text);
 }
 
 .related-operation {

@@ -77,36 +77,49 @@ const onConnectIns = () => {
         </div>
       </a-tooltip>
     </template>
-    <a-popover :arrow="false" class="setting-box" trigger="click" placement="rightTop">
-      <template #content>
-        <p>
-          <a-button @click="toggleDevTools" type="text">{{ $t('调试器（Alt + Shift + F12）') }}</a-button>
+    <div ref="popover" class="setting-box">
+      <a-popover :getPopupContainer="() => $refs.popover" :arrowPointAtCenter="true" :arrow="false" trigger="click"
+        placement="rightTop">
+        <template #content>
+          <p>
+            <a-button class="popover-item" @click="toggleDevTools" type="text">{{ $t('调试器（Alt + Shift + F12）')
+              }}</a-button>
+          </p>
+          <p>
+            <a-button class="popover-item" @click="onConnectIns" type="text">{{ $t('连接说明') }}</a-button>
+          </p>
+          <a-button class="popover-item" @click="checkIsUpdate" type="text">{{ $t('检查更新') }}</a-button>
+          <p class="version" type="text">{{ $t('版本号：v{version}', { version }) }}<span class="have-update-text"
+              v-if="appStore.updateResult.hasUpgrade">-->{{ appStore.updateResult.latestVersion ?? '' }}</span></p>
+        </template>
+        <a-badge :dot="appStore.updateResult.hasUpgrade">
+          <SettingOutlined class="setting-icon" />
+        </a-badge>
+      </a-popover>
+    </div>
+    <div ref="updateContent" class="update-content">
+      <a-modal :getContainer="() => $refs.updateContent" v-model:open="openUpdate" :title="$t('更新内容')"
+        :ok-text="$t('去下载')" :cancel-text="$t('取消')" @ok="onUpdate">
+        <p class="dialog-version">{{ $t('最新版本号：v{latestVersion}', {
+          latestVersion: appStore.updateResult.latestVersion
+        })
+          }}
         </p>
         <p>
-          <a-button @click="onConnectIns" type="text">{{ $t('连接说明') }}</a-button>
+          {{ $t('更新内容：') }}
+        <p class="update-content">{{ appStore.updateResult?.releaseDetails?.body ?? '' }}</p>
         </p>
-        <a-button @click="checkIsUpdate" type="text">{{ $t('检查更新') }}</a-button>
-        <p class="version" type="text">{{ $t('版本号：v{version}', { version }) }}<span class="have-update-text"
-            v-if="appStore.updateResult.hasUpgrade">-->{{ appStore.updateResult.latestVersion ?? '' }}</span></p>
-      </template>
-      <a-badge :dot="appStore.updateResult.hasUpgrade">
-        <SettingOutlined class="setting-icon" />
-      </a-badge>
-    </a-popover>
-    <a-modal v-model:open="openUpdate" :title="$t('更新内容')" :ok-text="$t('去下载')" :cancel-text="$t('取消')" @ok="onUpdate">
-      <p class="dialog-version">{{ $t('最新版本号：v{latestVersion}', { latestVersion: appStore.updateResult.latestVersion })
-        }}
-      </p>
-      <div>
-        {{ $t('更新内容：') }}<p class="update-content">{{ appStore.updateResult?.releaseDetails?.body ?? '' }}</p>
-      </div>
-    </a-modal>
-    <a-modal v-model:open="isShowConnect" :title="$t('连接说明')" :ok-text="$t('知道了')" :cancel-text="$t('取消')"
-      @ok="isShowConnect = false">
-      <p>{{ $t('1. 请在需要调试的手机上写上这个 IP 地址：') }}<span class="ip">{{ ip }}</span></p>
-      <p>{{ $t('2. 请保证你调试的手机和这个 ip 地址处于同一个局域网；') }}</p>
-      <p>{{ $t('3. 如果还是不行，请检查你手机/电脑是否开了代理，如果有请先关闭。') }}</p>
-    </a-modal>
+      </a-modal>
+    </div>
+
+    <div ref="contentTip" class="tip-box">
+      <a-modal :getContainer="() => $refs.contentTip" v-model:open="isShowConnect" :title="$t('连接说明')"
+        :ok-text="$t('知道了')" :cancel-text="$t('取消')" @ok="isShowConnect = false">
+        <p>{{ $t('1. 请在需要调试的手机上写上这个 IP 地址：') }}<span class="ip">{{ ip }}</span></p>
+        <p>{{ $t('2. 请保证你调试的手机和这个 ip 地址处于同一个局域网；') }}</p>
+        <p>{{ $t('3. 如果还是不行，请检查你手机/电脑是否开了代理，如果有请先关闭。') }}</p>
+      </a-modal>
+    </div>
   </div>
 </template>
 
@@ -156,6 +169,7 @@ const onConnectIns = () => {
 .version {
   text-align: left;
   padding: 4px 15px;
+  color: var(--color-text);
 }
 
 p {
@@ -181,5 +195,67 @@ p {
 
 .ip {
   font-weight: bold;
+}
+
+:deep(.ant-popover-inner) {
+  background-color: var(--color-background-soft);
+}
+
+:deep(.ant-popover-arrow::after) {
+  background-color: var(--color-background-soft);
+}
+
+:deep(.ant-popover-arrow::before) {
+  background-color: var(--color-background-soft);
+}
+
+.popover-item {
+  color: var(--color-text);
+}
+
+.popover-item:hover {
+  color: var(--color-main);
+}
+
+:deep(.ant-modal-content) {
+  background-color: var(--color-background-soft);
+
+  .ant-modal-title {
+    color: red;
+  }
+}
+
+:deep(.ant-modal-title) {
+  background-color: var(--color-background-soft);
+  color: var(--color-text)
+}
+
+:deep(.ant-input) {
+  background-color: var(--color-background);
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+
+:deep(.ant-input::placeholder) {
+  color: var(--color-border);
+}
+
+:deep(.ant-btn-default) {
+  background-color: var(--color-background);
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+
+:deep(.ant-btn-primary) {
+  background-color: var(--color-main);
+  color: var(--color-text);
+}
+
+.tip-box p {
+  color: var(--color-text);
+}
+
+.update-content p {
+  color: var(--color-text);
 }
 </style>

@@ -33,6 +33,13 @@ const networkStore = useNetworkStore()
   width: 60%;
   line-height: 25px;
   font-family: "新宋体 Console";
+  background-color: var(--color-background);
+  border-color: var(--color-border);
+  color: var(--color-text);
+}
+
+:deep(.search-box::placeholder) {
+  color: var(--color-border);
 }
 
 .search-box:focus {

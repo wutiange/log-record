@@ -30,6 +30,9 @@ const createWindow = () => {
 
   // 设置标题栏颜色
   function updateTitleBarOverlay() {
+    if (process.platform !== 'win32') {
+      return;
+    }
     mainWindow.setTitleBarOverlay({
       color: nativeTheme.shouldUseDarkColors ? '#181818' : '#ffffff',
       symbolColor: nativeTheme.shouldUseDarkColors

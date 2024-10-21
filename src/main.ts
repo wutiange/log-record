@@ -1,4 +1,12 @@
-import { app, BrowserWindow, Menu, MenuItem, ipcMain, shell } from 'electron';
+import {
+  app,
+  BrowserWindow,
+  Menu,
+  MenuItem,
+  ipcMain,
+  shell,
+  nativeTheme,
+} from 'electron';
 import path from 'path';
 import serverClient from './server';
 import { checkForUpgrade } from './utils/update';
@@ -12,8 +20,8 @@ const createWindow = () => {
     height: 600,
     titleBarStyle: 'hidden',
     titleBarOverlay: {
-      color: '#fff',
-      symbolColor: '#336666',
+      color: nativeTheme.shouldUseDarkColors ? '#1a1a1a' : '#ffffff',
+      symbolColor: nativeTheme.shouldUseDarkColors ? '#66cccc' : '#336666',
       height: 38,
     },
     webPreferences: {

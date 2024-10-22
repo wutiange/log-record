@@ -11,10 +11,13 @@ const props = defineProps(['csn']);
 
 const reqBody = computed(() => {
   try {
+    if (!props.csn.reqBody) {
+      return null;
+    }
     return JSON.parse(props.csn.reqBody);
   } catch (error) {
-    console.warn('解析响应体失败', error);
-    return props.csn?.reqBody ?? null;
+    console.warn('解析响应体失败', error, props.csn.reqBody);
+    return props.csn.reqBody;
   }
 });
 
@@ -68,12 +71,15 @@ const copyText = async (text: any) => {
       </div>
       <div class="strip">
         <span class="label-item">{{ $t('请求体：') }}</span>
-        <vue-json-pretty v-if="csn.reqBody" :data="reqBody" :deep="2" :show-double-quotes="true" showLength show-icon
-          :collapsed-on-click-brackets="true" :key="csn.id + 'requestBody'" />
-        <span v-else>{{ $t('空') }}</span>
-        <span v-if="csn.reqBody" class="copy" @click="copyText(reqBody)">
-          {{ $t('复制') }}
-        </span>
+        <div class="body-box">
+          <pre v-if="typeof reqBody === 'string'" v-html="reqBody" />
+          <vue-json-pretty v-else-if="csn.reqBody" :data="reqBody" :deep="2" :show-double-quotes="true" showLength
+            show-icon :collapsed-on-click-brackets="true" :key="csn.id + 'requestBody'" />
+          <span v-else>{{ $t('空') }}</span>
+          <span v-if="csn.reqBody" class="copy" @click="copyText(reqBody)">
+            {{ $t('复制') }}
+          </span>
+        </div>
       </div>
     </div>
     <div class="content-box">
@@ -98,12 +104,15 @@ const copyText = async (text: any) => {
         </div>
         <div class="strip">
           <span class="label-item">{{ $t('响应体：') }}</span>
-          <vue-json-pretty v-if="csn.resBody" :data="resBody" :deep="3" :show-double-quotes="true" showLength show-icon
-            :collapsed-on-click-brackets="true" :key="csn.id + 'responseBody'" />
-          <span v-else>空</span>
-          <span v-if="csn.resBody" class="copy" @click="copyText(resBody)">
-            {{ $t('复制') }}
-          </span>
+          <div class="body-box">
+            <pre v-if="typeof resBody === 'string'" v-html="reqBody" />
+            <vue-json-pretty v-else-if="csn.resBody" :data="resBody" :deep="3" :show-double-quotes="true" showLength
+              show-icon :collapsed-on-click-brackets="true" :key="csn.id + 'responseBody'" />
+            <span v-else>空</span>
+            <span v-if="csn.resBody" class="copy" @click="copyText(resBody)">
+              {{ $t('复制') }}
+            </span>
+          </div>
         </div>
       </template>
     </div>
@@ -123,7 +132,7 @@ const copyText = async (text: any) => {
   flex-direction: column;
   background-color: var(--color-background);
   padding: 15px;
-  border-radius: 10px;
+  border-radius: var(--border-radius-large);
 }
 
 .strip {
@@ -144,7 +153,14 @@ const copyText = async (text: any) => {
   flex-direction: column;
   width: 100%;
   border: 1px solid var(--color-scroll);
-  border-radius: var(--border-radius-default);
+  border-radius: var(--border-radius-large);
+}
+
+.body-box {
+  width: 100%;
+  border: 1px solid var(--color-scroll);
+  border-radius: var(--border-radius-large);
+  padding: 10px;
 }
 
 .row-container {
@@ -187,8 +203,8 @@ const copyText = async (text: any) => {
 
 .copy {
   position: absolute;
-  right: 0;
-  top: 0;
+  right: 10px;
+  top: 10px;
   cursor: pointer;
 }
 

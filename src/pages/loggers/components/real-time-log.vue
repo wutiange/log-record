@@ -46,12 +46,12 @@ const parseText = (text: string) => {
 </script>
 
 <template>
-  <DynamicScroller :items="finallyLoggers" :min-item-size="54" class="log-container" ref="divRef" @scroll="scroll"
-    @wheel="wheel">
-    <template v-slot="{ item, index, active }">
+  <DynamicScroller :items="finallyLoggers" type-field="level" :min-item-size="54" class="log-container" ref="divRef"
+    @scroll="scroll" @wheel="wheel">
+    <template v-slot="{ item, active }">
       <DynamicScrollerItem :item="item" :active="active" :size-dependencies="[
         item.formatData,
-      ]" :data-index="index" class="item-box">
+      ]" :data-index="`${item.createTime}_${item.id}`" class="item-box">
         <div :class="`log-level-sign ${item.level}`" />
         <a-tag class="tag-box">{{ dayjs(item.createTime).format("HH:mm:ss.SSS") }}</a-tag>
 
@@ -139,5 +139,4 @@ const parseText = (text: string) => {
   gap: 10px;
   flex-wrap: wrap;
 }
-
 </style>

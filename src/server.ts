@@ -1,16 +1,42 @@
 import express, { Express } from 'express';
 import type { IncomingMessage, ServerResponse, Server } from 'http';
 import { httpPort } from './config';
+import { Bonjour, Service } from 'bonjour-service';
+import deviceId from './utils/deviceId';
 
 class ServerClient {
   private app: Express | null = null;
+  private bonjour: Bonjour | null = null;
+  private pairedServices: Record<string, Service> = {};
   private runningServer: Server<
     typeof IncomingMessage,
     typeof ServerResponse
   > | null = null;
   constructor() {
     this.app = express();
+    this.bonjour = new Bonjour();
     this.app.use(express.json({ limit: '50mb' }));
+  }
+
+  scanBonjour(handleServices: (services: Service) => void) {
+    this.bonjour.find({ type: 'http' }, (service) => {
+      handleServices(service);
+    });
+  }
+
+  connect(service: Service) {
+    const { id, uniqueId } = service.txt ?? {};
+    const ownUniqueId = `${deviceId}-${httpPort}`;
+    if (id && !this.pairedServices[id] && uniqueId !== ownUniqueId) {
+      // advertise an HTTP server on port 3000
+      const server = this.bonjour.publish({
+        name: `Log Record Server$$${id}`,
+        type: 'http',
+        port: httpPort,
+        txt: { uniqueId: ownUniqueId, id },
+      });
+      this.pairedServices[service.txt.id] = server;
+    }
   }
 
   startListen(

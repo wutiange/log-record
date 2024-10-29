@@ -5,11 +5,13 @@ import { SettingOutlined } from '@ant-design/icons-vue'
 import { version } from '../../../package.json'
 import useAppStore from '@/stores/app';
 import { useI18n } from 'vue-i18n';
+import { Service } from 'bonjour-service';
 const router = useRouter()
 const appStore = useAppStore()
 const openUpdate = ref(false)
 const isShowConnect = ref(false)
 const i18n = useI18n()
+const bonjourPhones = ref<Service[]>([])
 const ip = ref('')
 const funcs = reactive([
   // @ts-ignore
@@ -22,9 +24,17 @@ const selectedObj = reactive<Record<string, boolean>>({
   '/network': false
 })
 
+window.electronAPI.onScanBonjour((service) => {
+  if (bonjourPhones.value.find((item) => item.referer?.address === service.referer?.address)) {
+    return
+  }
+  bonjourPhones.value.push(service)
+})
+
 onMounted(async () => {
   const tempIp = await window.electronAPI.getIPAddress()
   ip.value = tempIp
+  window.electronAPI.startScanBonjour()
 })
 
 const onSwapFunc = (path: string) => {
@@ -77,6 +87,14 @@ const onConnectIns = () => {
   isShowConnect.value = true
 }
 
+const onConnect = (service: Service) => {
+  if (!service.txt?.id) {
+    return
+  }
+  window.electronAPI.connectBonjour(JSON.stringify(service))
+}
+
+
 </script>
 
 <template>
@@ -124,11 +142,23 @@ const onConnectIns = () => {
     </div>
 
     <div ref="contentTip" class="tip-box">
-      <a-modal :getContainer="() => $refs.contentTip" v-model:open="isShowConnect" :title="$t('连接说明')"
-        :ok-text="$t('知道了')" :cancel-text="$t('取消')" @ok="isShowConnect = false">
-        <p>{{ $t('1. 请在需要调试的手机上写上这个 IP 地址：') }}<span class="ip">{{ ip }}</span></p>
-        <p>{{ $t('2. 请保证你调试的手机和这个 ip 地址处于同一个局域网；') }}</p>
-        <p>{{ $t('3. 如果还是不行，请检查你手机/电脑是否开了代理，如果有请先关闭。') }}</p>
+      <a-modal :getContainer="() => $refs.contentTip" v-model:open="isShowConnect"
+        :title="bonjourPhones.length > 0 ? $t('检测到附近有可以连接的手机，点击建立连接') : $t('连接说明')" :ok-text="$t('知道了')"
+        :cancel-text="$t('取消')" @ok="isShowConnect = false">
+
+        <div v-if="bonjourPhones.length > 0" class="bonjour-box">
+          <div class="phone-list">
+            <a-button v-for="service in bonjourPhones" @click="() => onConnect(service)" :key="service.txt?.id">{{
+              service.name
+            }}
+              ({{ service.referer?.address ?? '--' }})</a-button>
+          </div>
+        </div>
+        <template v-else>
+          <p>{{ $t('1. 请在需要调试的手机上写上这个 IP 地址：') }}<span class="ip">{{ ip }}</span></p>
+          <p>{{ $t('2. 请保证你调试的手机和这个 ip 地址处于同一个局域网；') }}</p>
+          <p>{{ $t('3. 如果还是不行，请检查你手机/电脑是否开了代理，如果有请先关闭。') }}</p>
+        </template>
       </a-modal>
     </div>
   </div>
@@ -259,7 +289,7 @@ p {
 
 :deep(.ant-btn-primary) {
   background-color: var(--color-main);
-  color: var(--color-text);
+  color: var(--color-background);
 }
 
 .tip-box p {
@@ -269,5 +299,18 @@ p {
 .update-content-tip p,
 div {
   color: var(--color-text);
+}
+
+.bonjour-box {
+  margin-top: 20px;
+}
+
+.phone-list {
+  margin-top: 5px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 5px;
+  flex-wrap: wrap;
 }
 </style>

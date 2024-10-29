@@ -12,8 +12,10 @@ import serverClient from './server';
 import { checkForUpgrade } from './utils/update';
 import { name, author, version } from '../package.json';
 import { getIPAddress } from './utils/node-strings';
+import deviceId from './utils/deviceId';
 
 const createWindow = () => {
+  deviceId;
   // Create the browser window.
   const mainWindow = new BrowserWindow({
     width: 1200,
@@ -42,6 +44,11 @@ const createWindow = () => {
     });
   }
 
+  // 处理渲染进程发送的数据
+  ipcMain.on('connect-bonjour', (_, data) => {
+    serverClient.connect(JSON.parse(data));
+  });
+
   // 初始设置
   updateTitleBarOverlay();
 
@@ -50,6 +57,12 @@ const createWindow = () => {
 
   ipcMain.handle('toggleDevTools', () => mainWindow.webContents.openDevTools());
   ipcMain.handle('getIPAddress', () => getIPAddress());
+  ipcMain.handle('startScanBonjour', () => {
+    serverClient.scanBonjour((service) => {
+      console.log(service);
+      mainWindow.webContents.send('service:msg', service);
+    });
+  });
   ipcMain.handle('checkIsUpdate', () =>
     checkForUpgrade(author.name, name, version),
   );

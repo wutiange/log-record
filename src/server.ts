@@ -20,6 +20,9 @@ class ServerClient {
 
   scanBonjour(handleServices: (services: Service) => void) {
     this.bonjour.find({ type: 'http' }, (service) => {
+      if (service.name.includes('Log Record Server')) {
+        return;
+      }
       handleServices(service);
     });
   }

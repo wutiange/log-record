@@ -59,7 +59,6 @@ const createWindow = () => {
   ipcMain.handle('getIPAddress', () => getIPAddress());
   ipcMain.handle('startScanBonjour', () => {
     serverClient.scanBonjour((service) => {
-      console.log(service);
       mainWindow.webContents.send('service:msg', service);
     });
   });

@@ -174,13 +174,13 @@ const onConnect = (model: string, id: string) => {
       <a-modal :getContainer="() => $refs.contentTip" v-model:open="isShowConnect" :title="phones.length > 0
         ? $t('检测到附近有可以连接的手机，点击建立连接')
         : $t('连接说明')
-        " :ok-text="$t('知道了')" :cancel-text="$t('取消')" @ok="isShowConnect = false" :footer="phones.length > 0 && null">
+        " @ok="isShowConnect = false" :footer="null">
         <div v-if="phones.length > 0" class="bonjour-box">
           <div class="phone-list" v-for="{ model, id, isConnect } in phones" :key="`${model}-${id}`">
             <span class="model-text">{{ model }} ({{ id ?? '--' }})</span>
             <div class="phone-op-box" v-if="!isConnect">
-              <a-button type="primary" danger ghost @click="() => onReject(model, id)">拒绝</a-button>
-              <a-button type="primary" @click="() => onConnect(model, id)">连接</a-button>
+              <a-button type="primary" danger ghost @click="() => onReject(model, id)">{{ $t('拒绝') }}</a-button>
+              <a-button type="primary" @click="() => onConnect(model, id)">{{ $t('连接') }}</a-button>
             </div>
             <CheckCircleOutlined two-tone-color="#52c41a" v-else />
           </div>

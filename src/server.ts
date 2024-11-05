@@ -55,7 +55,6 @@ class ServerClient {
     this.app.post(JOIN_PATH, (req, res) => {
       const { model, token, id } = req.body;
       res.setHeader('Content-Type', 'application/json');
-      console.log(model, token, id);
       if (this.token === token) {
         this.handlePhone(model, id);
         this.clientIds[`${model}-${id}`] = res;

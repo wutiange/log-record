@@ -71,19 +71,19 @@ const copyText = async (text: any) => {
       </div>
       <div class="strip">
         <span class="label-item">{{ $t('请求体：') }}</span>
-        <div class="body-box">
+        <div class="body-box" v-if="csn.reqBody">
           <pre v-if="typeof reqBody === 'string'" v-html="reqBody" />
           <vue-json-pretty v-else-if="csn.reqBody" :data="reqBody" :deep="2" :show-double-quotes="true" showLength
             show-icon :collapsed-on-click-brackets="true" :key="csn.id + 'requestBody'" />
-          <span v-else>{{ $t('空') }}</span>
           <span v-if="csn.reqBody" class="copy" @click="copyText(reqBody)">
             {{ $t('复制') }}
           </span>
         </div>
+        <span v-else>{{ $t('空') }}</span>
       </div>
     </div>
-    <div class="content-box">
-      <template v-if="csn.statusCode">
+    <div class="content-box" v-if="typeof csn.statusCode === 'number'">
+      <template v-if="typeof csn.statusCode === 'number'">
         <div class="strip">
           <span class="label-item">{{ $t('响应时间：') }}</span>
           <span>{{ dayjs(csn.endTime).format('YYYY-MM-DD HH:mm:ss') }}</span>
@@ -104,15 +104,15 @@ const copyText = async (text: any) => {
         </div>
         <div class="strip">
           <span class="label-item">{{ $t('响应体：') }}</span>
-          <div class="body-box">
-            <pre v-if="typeof resBody === 'string'" v-html="reqBody" />
+          <div class="body-box" v-if="resBody">
+            <pre v-if="typeof resBody === 'string'" v-html="resBody" />
             <vue-json-pretty v-else-if="csn.resBody" :data="resBody" :deep="3" :show-double-quotes="true" showLength
               show-icon :collapsed-on-click-brackets="true" :key="csn.id + 'responseBody'" />
-            <span v-else>空</span>
             <span v-if="csn.resBody" class="copy" @click="copyText(resBody)">
               {{ $t('复制') }}
             </span>
           </div>
+          <span v-else>空</span>
         </div>
       </template>
     </div>

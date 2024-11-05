@@ -1,100 +1,108 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { SettingOutlined } from '@ant-design/icons-vue'
-import { version } from '../../../package.json'
+import { SettingOutlined } from '@ant-design/icons-vue';
+import { version } from '../../../package.json';
 import useAppStore from '@/stores/app';
 import { useI18n } from 'vue-i18n';
 import { Service } from 'bonjour-service';
-const router = useRouter()
-const appStore = useAppStore()
-const openUpdate = ref(false)
-const isShowConnect = ref(false)
-const i18n = useI18n()
-const bonjourPhones = ref<Service[]>([])
-const ip = ref('')
+const router = useRouter();
+const appStore = useAppStore();
+const openUpdate = ref(false);
+const isShowConnect = ref(false);
+const i18n = useI18n();
+const phones = ref<{ model: string; id: string }[]>([]);
+const ip = ref('');
 const funcs = reactive([
   // @ts-ignore
-  { img: new URL('../../assets/images/log.svg', import.meta.url).href, path: '/log', text: i18n.t('日志') },
+  {
+    img: new URL('../../assets/images/log.svg', import.meta.url).href,
+    path: '/log',
+    text: i18n.t('日志'),
+  },
   // @ts-ignore
-  { img: new URL('../../assets/images/network.svg', import.meta.url).href, path: '/network', text: i18n.t('网络') },
+  {
+    img: new URL('../../assets/images/network.svg', import.meta.url).href,
+    path: '/network',
+    text: i18n.t('网络'),
+  },
 ]);
 const selectedObj = reactive<Record<string, boolean>>({
   '/log': true,
-  '/network': false
-})
+  '/network': false,
+});
 
-window.electronAPI.onScanBonjour((service) => {
-  if (bonjourPhones.value.find((item) => item.referer?.address === service.referer?.address)) {
-    return
+window.electronAPI.onScanPhone((model, id) => {
+  if (
+    phones.value.find((item) => `${item.model}-${item.id}` === `${model}-${id}`)
+  ) {
+    return;
   }
-  bonjourPhones.value.push(service)
-})
+  phones.value.push({ model, id });
+});
 
 onMounted(async () => {
-  const tempIp = await window.electronAPI.getIPAddress()
-  ip.value = tempIp
-  window.electronAPI.startScanBonjour()
-})
+  const tempIp = await window.electronAPI.getIPAddress();
+  ip.value = tempIp;
+  window.electronAPI.startScanPhone();
+});
 
 const onSwapFunc = (path: string) => {
-  const lastPath = router.currentRoute.value.path
-  selectedObj[lastPath] = false
-  selectedObj[path] = true
-  router.push(path)
+  const lastPath = router.currentRoute.value.path;
+  selectedObj[lastPath] = false;
+  selectedObj[path] = true;
+  router.push(path);
 };
 
 const toggleDevTools = () => {
-  window.electronAPI.toggleDevTools()
-}
+  window.electronAPI.toggleDevTools();
+};
 
 const checkIsUpdate = async () => {
-  await appStore.updateCheck()
+  await appStore.updateCheck();
   if (appStore.updateResult?.hasUpgrade) {
-    openUpdate.value = true
+    openUpdate.value = true;
   }
-}
+};
 
-watch(() => appStore.updateResult.hasUpgrade, () => {
-  if (appStore.updateResult.hasUpgrade) {
-    openUpdate.value = true
-  }
-})
+watch(
+  () => appStore.updateResult.hasUpgrade,
+  () => {
+    if (appStore.updateResult.hasUpgrade) {
+      openUpdate.value = true;
+    }
+  },
+);
 
 const updateContent = computed(() => {
-  const body = appStore.updateResult?.releaseDetails?.body ?? ''
+  const body = appStore.updateResult?.releaseDetails?.body ?? '';
   try {
-    const bodyObj = JSON.parse(body)
-    return bodyObj[i18n.locale.value].join("\n")
+    const bodyObj = JSON.parse(body);
+    return bodyObj[i18n.locale.value].join('\n');
   } catch (error) {
-    console.warn("在得到更新内容的地方出现了错误---", error)
-    return body
+    console.warn('在得到更新内容的地方出现了错误---', error);
+    return body;
   }
-})
+});
 
 const latestVersion = computed(() => {
-  return appStore.updateResult?.latestVersion ?? ''
-})
+  return appStore.updateResult?.latestVersion ?? '';
+});
 
 const onUpdate = () => {
   if (!appStore.updateResult?.releaseDetails?.html_url) {
-    return
+    return;
   }
-  window.electronAPI.openUrl(appStore.updateResult.releaseDetails.html_url)
-}
+  window.electronAPI.openUrl(appStore.updateResult.releaseDetails.html_url);
+};
 
 const onConnectIns = () => {
-  isShowConnect.value = true
-}
+  isShowConnect.value = true;
+};
 
-const onConnect = (service: Service) => {
-  if (!service.txt?.id) {
-    return
-  }
-  window.electronAPI.connectBonjour(JSON.stringify(service))
-}
-
-
+const onConnect = (model: string, id: string) => {
+  window.electronAPI.connectPhone(model, id, false);
+};
 </script>
 
 <template>
@@ -104,26 +112,52 @@ const onConnect = (service: Service) => {
         <template #title>
           <span>{{ func.text }}</span>
         </template>
-        <div :class="{ 'icon-container': true, 'selected-icon-container': selectedObj[func.path] }"
-          @click="() => onSwapFunc(func.path)">
-          <img :src="func.img" alt="" :class="{ icon: true, 'selected-icon': selectedObj[func.path] }" />
+        <div
+          :class="{
+            'icon-container': true,
+            'selected-icon-container': selectedObj[func.path],
+          }"
+          @click="() => onSwapFunc(func.path)"
+        >
+          <img
+            :src="func.img"
+            alt=""
+            :class="{ icon: true, 'selected-icon': selectedObj[func.path] }"
+          />
         </div>
       </a-tooltip>
     </template>
     <div ref="popover" class="setting-box">
-      <a-popover :getPopupContainer="() => $refs.popover" :arrowPointAtCenter="true" :arrow="false" trigger="click"
-        placement="rightTop">
+      <a-popover
+        :getPopupContainer="() => $refs.popover"
+        :arrowPointAtCenter="true"
+        :arrow="false"
+        trigger="click"
+        placement="rightTop"
+      >
         <template #content>
           <p>
-            <a-button class="popover-item" @click="toggleDevTools" type="text">{{ $t('调试器（Alt + Shift + F12）')
-              }}</a-button>
+            <a-button class="popover-item" @click="toggleDevTools" type="text">
+              {{ $t('调试器（Alt + Shift + F12）') }}
+            </a-button>
           </p>
           <p>
-            <a-button class="popover-item" @click="onConnectIns" type="text">{{ $t('连接说明') }}</a-button>
+            <a-button class="popover-item" @click="onConnectIns" type="text">
+              {{ $t('连接说明') }}
+            </a-button>
           </p>
-          <a-button class="popover-item" @click="checkIsUpdate" type="text">{{ $t('检查更新') }}</a-button>
-          <p class="version" type="text">{{ $t('版本号：v{version}', { version }) }}<span class="have-update-text"
-              v-if="appStore.updateResult.hasUpgrade">-->{{ appStore.updateResult.latestVersion ?? '' }}</span></p>
+          <a-button class="popover-item" @click="checkIsUpdate" type="text">
+            {{ $t('检查更新') }}
+          </a-button>
+          <p class="version" type="text">
+            {{ $t('版本号：v{version}', { version }) }}
+            <span
+              class="have-update-text"
+              v-if="appStore.updateResult.hasUpgrade"
+            >
+              -->{{ appStore.updateResult.latestVersion ?? '' }}
+            </span>
+          </p>
         </template>
         <a-badge :dot="appStore.updateResult.hasUpgrade">
           <SettingOutlined class="setting-icon" />
@@ -131,33 +165,63 @@ const onConnect = (service: Service) => {
       </a-popover>
     </div>
     <div ref="updateContentTip" class="update-content-tip">
-      <a-modal :getContainer="() => $refs.updateContentTip" v-model:open="openUpdate" :title="$t('更新内容')"
-        :ok-text="$t('去下载')" :cancel-text="$t('取消')" @ok="onUpdate">
-        <p class="dialog-version">{{ $t('最新版本号：v{latestVersion}', { latestVersion }) }}
+      <a-modal
+        :getContainer="() => $refs.updateContentTip"
+        v-model:open="openUpdate"
+        :title="$t('更新内容')"
+        :ok-text="$t('去下载')"
+        :cancel-text="$t('取消')"
+        @ok="onUpdate"
+      >
+        <p class="dialog-version">
+          {{ $t('最新版本号：v{latestVersion}', { latestVersion }) }}
         </p>
         <div>
-          {{ $t('更新内容：') }}<p class="update-content">{{ updateContent }}</p>
+          {{ $t('更新内容：') }}
+          <p class="update-content">{{ updateContent }}</p>
         </div>
       </a-modal>
     </div>
 
     <div ref="contentTip" class="tip-box">
-      <a-modal :getContainer="() => $refs.contentTip" v-model:open="isShowConnect"
-        :title="bonjourPhones.length > 0 ? $t('检测到附近有可以连接的手机，点击建立连接') : $t('连接说明')" :ok-text="$t('知道了')"
-        :cancel-text="$t('取消')" @ok="isShowConnect = false">
-
-        <div v-if="bonjourPhones.length > 0" class="bonjour-box">
+      <a-modal
+        :getContainer="() => $refs.contentTip"
+        v-model:open="isShowConnect"
+        :title="
+          phones.length > 0
+            ? $t('检测到附近有可以连接的手机，点击建立连接')
+            : $t('连接说明')
+        "
+        :ok-text="$t('知道了')"
+        :cancel-text="$t('取消')"
+        @ok="isShowConnect = false"
+      >
+        <div v-if="phones.length > 0" class="bonjour-box">
           <div class="phone-list">
-            <a-button v-for="service in bonjourPhones" @click="() => onConnect(service)" :key="service.txt?.id">{{
-              service.name
-            }}
-              ({{ service.referer?.address ?? '--' }})</a-button>
+            <a-button
+              v-for="{ model, id } in phones"
+              @click="() => onConnect(model, id)"
+              :key="`${model}-${id}`"
+            >
+              {{ model }} ({{ id ?? '--' }})
+            </a-button>
           </div>
         </div>
         <template v-else>
-          <p>{{ $t('1. 请在需要调试的手机上写上这个 IP 地址：') }}<span class="ip">{{ ip }}</span></p>
-          <p>{{ $t('2. 请保证你调试的手机和这个 ip 地址处于同一个局域网；') }}</p>
-          <p>{{ $t('3. 如果还是不行，请检查你手机/电脑是否开了代理，如果有请先关闭。') }}</p>
+          <p>
+            {{ $t('1. 请在需要调试的手机上写上这个 IP 地址：') }}
+            <span class="ip">{{ ip }}</span>
+          </p>
+          <p>
+            {{ $t('2. 请保证你调试的手机和这个 ip 地址处于同一个局域网；') }}
+          </p>
+          <p>
+            {{
+              $t(
+                '3. 如果还是不行，请检查你手机/电脑是否开了代理，如果有请先关闭。',
+              )
+            }}
+          </p>
         </template>
       </a-modal>
     </div>
@@ -268,7 +332,7 @@ p {
 
 :deep(.ant-modal-title) {
   background-color: var(--color-background-soft);
-  color: var(--color-text)
+  color: var(--color-text);
 }
 
 :deep(.ant-input) {

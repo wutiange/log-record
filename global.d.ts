@@ -10,12 +10,12 @@ declare global {
       onGetNetworkMsg: (
         msgCallback: (msg: Record<string, any>) => void,
       ) => void;
-      onScanBonjour: (msgCallback: (service: Service) => void) => void;
+      onScanPhone: (msgCallback: (model: string, id: string) => void) => void;
       checkIsUpdate: () => Promise<UpgradeCheckResult>;
       toggleDevTools: () => Promise<void>;
       openUrl: (url: string) => void;
-      connectBonjour: (service: string) => void;
-      startScanBonjour: () => void;
+      connectPhone: (model: string, id: string, isAgree: boolean) => void;
+      startScanPhone: () => void;
     };
   }
 }

@@ -1,45 +1,41 @@
-import express, { Express } from 'express';
+import express, { Express, Response } from 'express';
 import type { IncomingMessage, ServerResponse, Server } from 'http';
 import { httpPort } from './config';
-import { Bonjour, Service } from 'bonjour-service';
-import deviceId from './utils/deviceId';
+import { Bonjour } from 'bonjour-service';
 
+const JOIN_PATH = '/join';
 class ServerClient {
   private app: Express | null = null;
-  private bonjour: Bonjour | null = null;
-  private pairedServices: Record<string, Service> = {};
+  private handlePhone: (model: string, id: string) => void;
   private runningServer: Server<
     typeof IncomingMessage,
     typeof ServerResponse
   > | null = null;
+  private token = `${Date.now().toString(16)}-${Math.random().toString(16)}`;
+  private clientIds: Record<string, Response> = {};
+
   constructor() {
     this.app = express();
-    this.bonjour = new Bonjour();
+    const bonjour = new Bonjour();
     this.app.use(express.json({ limit: '50mb' }));
-  }
-
-  scanBonjour(handleServices: (services: Service) => void) {
-    this.bonjour.find({ type: 'http' }, (service) => {
-      if (service.name.includes('Log Record Server')) {
-        return;
-      }
-      handleServices(service);
+    bonjour.publish({
+      name: `Log Record Server`,
+      type: 'http',
+      port: httpPort,
+      protocol: 'tcp',
+      txt: { path: JOIN_PATH, token: this.token },
     });
   }
 
-  connect(service: Service) {
-    const { id, uniqueId } = service.txt ?? {};
-    const ownUniqueId = `${deviceId}-${httpPort}`;
-    if (id && !this.pairedServices[id] && uniqueId !== ownUniqueId) {
-      // advertise an HTTP server on port 3000
-      const server = this.bonjour.publish({
-        name: `Log Record Server$$${id}`,
-        type: 'http',
-        port: httpPort,
-        txt: { uniqueId: ownUniqueId, id },
-      });
-      this.pairedServices[service.txt.id] = server;
-    }
+  scanPhone(handlePhone: (model: string, id: string) => void) {
+    this.handlePhone = handlePhone;
+  }
+
+  connect(model: string, id: string, isAgree: boolean) {
+    this.clientIds[`${model}-${id}`]?.end({
+      code: isAgree ? 0 : 2,
+      message: isAgree ? 'ok' : 'Access denied',
+    });
   }
 
   startListen(
@@ -52,6 +48,17 @@ class ServerClient {
         handle({ id: ++id, ...req.body });
         res.end(id.toString());
       });
+    });
+
+    this.app.post(JOIN_PATH, (req, res) => {
+      const { model, token, id } = req.body;
+      console.log(model, token, id);
+      if (this.token === token) {
+        this.handlePhone(model, id);
+        this.clientIds[`${model}-${id}`] = res;
+      } else {
+        res.end({ code: 1, message: 'Token error' });
+      }
     });
 
     this.runningServer = this.app.listen(httpPort);

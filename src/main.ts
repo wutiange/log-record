@@ -12,10 +12,8 @@ import serverClient from './server';
 import { checkForUpgrade } from './utils/update';
 import { name, author, version } from '../package.json';
 import { getIPAddress } from './utils/node-strings';
-import deviceId from './utils/deviceId';
 
 const createWindow = () => {
-  deviceId;
   // Create the browser window.
   const mainWindow = new BrowserWindow({
     width: 1200,
@@ -45,8 +43,8 @@ const createWindow = () => {
   }
 
   // 处理渲染进程发送的数据
-  ipcMain.on('connect-bonjour', (_, data) => {
-    serverClient.connect(JSON.parse(data));
+  ipcMain.on('connect-phone', (_, model, id, isAgree) => {
+    serverClient.connect(model, id, isAgree);
   });
 
   // 初始设置
@@ -57,9 +55,9 @@ const createWindow = () => {
 
   ipcMain.handle('toggleDevTools', () => mainWindow.webContents.openDevTools());
   ipcMain.handle('getIPAddress', () => getIPAddress());
-  ipcMain.handle('startScanBonjour', () => {
-    serverClient.scanBonjour((service) => {
-      mainWindow.webContents.send('service:msg', service);
+  ipcMain.handle('startScanPhone', () => {
+    serverClient.scanPhone((model, id) => {
+      mainWindow.webContents.send('service:msg', model, id);
     });
   });
   ipcMain.handle('checkIsUpdate', () =>

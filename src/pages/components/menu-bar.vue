@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { SettingOutlined } from '@ant-design/icons-vue';
+import { CheckCircleOutlined, SettingOutlined } from '@ant-design/icons-vue';
 import { version } from '../../../package.json';
 import useAppStore from '@/stores/app';
 import { useI18n } from 'vue-i18n';
@@ -11,7 +11,7 @@ const appStore = useAppStore();
 const openUpdate = ref(false);
 const isShowConnect = ref(false);
 const i18n = useI18n();
-const phones = ref<{ model: string; id: string }[]>([]);
+const phones = ref<{ model: string; id: string, isConnect: boolean }[]>([]);
 const ip = ref('');
 const funcs = reactive([
   // @ts-ignore
@@ -38,7 +38,7 @@ window.electronAPI.onScanPhone((model, id) => {
   ) {
     return;
   }
-  phones.value.push({ model, id });
+  phones.value.push({ model, id, isConnect: false });
 });
 
 onMounted(async () => {
@@ -100,8 +100,16 @@ const onConnectIns = () => {
   isShowConnect.value = true;
 };
 
-const onConnect = (model: string, id: string) => {
+const onReject = (model: string, id: string) => {
+  const itemPhoneIndex = phones.value.findIndex((item) => `${item.model}-${item.id}` === `${model}-${id}`)
+  phones.value.splice(itemPhoneIndex, 1)
   window.electronAPI.connectPhone(model, id, false);
+};
+
+const onConnect = (model: string, id: string) => {
+  const itemPhone = phones.value.find((item) => `${item.model}-${item.id}` === `${model}-${id}`)
+  itemPhone.isConnect = true
+  window.electronAPI.connectPhone(model, id, true);
 };
 </script>
 
@@ -112,29 +120,17 @@ const onConnect = (model: string, id: string) => {
         <template #title>
           <span>{{ func.text }}</span>
         </template>
-        <div
-          :class="{
-            'icon-container': true,
-            'selected-icon-container': selectedObj[func.path],
-          }"
-          @click="() => onSwapFunc(func.path)"
-        >
-          <img
-            :src="func.img"
-            alt=""
-            :class="{ icon: true, 'selected-icon': selectedObj[func.path] }"
-          />
+        <div :class="{
+          'icon-container': true,
+          'selected-icon-container': selectedObj[func.path],
+        }" @click="() => onSwapFunc(func.path)">
+          <img :src="func.img" alt="" :class="{ icon: true, 'selected-icon': selectedObj[func.path] }" />
         </div>
       </a-tooltip>
     </template>
     <div ref="popover" class="setting-box">
-      <a-popover
-        :getPopupContainer="() => $refs.popover"
-        :arrowPointAtCenter="true"
-        :arrow="false"
-        trigger="click"
-        placement="rightTop"
-      >
+      <a-popover :getPopupContainer="() => $refs.popover" :arrowPointAtCenter="true" :arrow="false" trigger="click"
+        placement="rightTop">
         <template #content>
           <p>
             <a-button class="popover-item" @click="toggleDevTools" type="text">
@@ -151,10 +147,7 @@ const onConnect = (model: string, id: string) => {
           </a-button>
           <p class="version" type="text">
             {{ $t('版本号：v{version}', { version }) }}
-            <span
-              class="have-update-text"
-              v-if="appStore.updateResult.hasUpgrade"
-            >
+            <span class="have-update-text" v-if="appStore.updateResult.hasUpgrade">
               -->{{ appStore.updateResult.latestVersion ?? '' }}
             </span>
           </p>
@@ -165,14 +158,8 @@ const onConnect = (model: string, id: string) => {
       </a-popover>
     </div>
     <div ref="updateContentTip" class="update-content-tip">
-      <a-modal
-        :getContainer="() => $refs.updateContentTip"
-        v-model:open="openUpdate"
-        :title="$t('更新内容')"
-        :ok-text="$t('去下载')"
-        :cancel-text="$t('取消')"
-        @ok="onUpdate"
-      >
+      <a-modal :getContainer="() => $refs.updateContentTip" v-model:open="openUpdate" :title="$t('更新内容')"
+        :ok-text="$t('去下载')" :cancel-text="$t('取消')" @ok="onUpdate">
         <p class="dialog-version">
           {{ $t('最新版本号：v{latestVersion}', { latestVersion }) }}
         </p>
@@ -184,27 +171,18 @@ const onConnect = (model: string, id: string) => {
     </div>
 
     <div ref="contentTip" class="tip-box">
-      <a-modal
-        :getContainer="() => $refs.contentTip"
-        v-model:open="isShowConnect"
-        :title="
-          phones.length > 0
-            ? $t('检测到附近有可以连接的手机，点击建立连接')
-            : $t('连接说明')
-        "
-        :ok-text="$t('知道了')"
-        :cancel-text="$t('取消')"
-        @ok="isShowConnect = false"
-      >
+      <a-modal :getContainer="() => $refs.contentTip" v-model:open="isShowConnect" :title="phones.length > 0
+        ? $t('检测到附近有可以连接的手机，点击建立连接')
+        : $t('连接说明')
+        " :ok-text="$t('知道了')" :cancel-text="$t('取消')" @ok="isShowConnect = false" :footer="phones.length > 0 && null">
         <div v-if="phones.length > 0" class="bonjour-box">
-          <div class="phone-list">
-            <a-button
-              v-for="{ model, id } in phones"
-              @click="() => onConnect(model, id)"
-              :key="`${model}-${id}`"
-            >
-              {{ model }} ({{ id ?? '--' }})
-            </a-button>
+          <div class="phone-list" v-for="{ model, id, isConnect } in phones" :key="`${model}-${id}`">
+            <span class="model-text">{{ model }} ({{ id ?? '--' }})</span>
+            <div class="phone-op-box" v-if="!isConnect">
+              <a-button type="primary" danger ghost @click="() => onReject(model, id)">拒绝</a-button>
+              <a-button type="primary" @click="() => onConnect(model, id)">连接</a-button>
+            </div>
+            <CheckCircleOutlined two-tone-color="#52c41a" v-else />
           </div>
         </div>
         <template v-else>
@@ -374,7 +352,26 @@ div {
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 5px;
   flex-wrap: wrap;
+  justify-content: space-between;
+  height: 40px;
+  gap: 10px;
+}
+
+.model-text {
+  flex: 1;
+  /*强制文本在一行内显示*/
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.phone-op-box {
+  display: flex;
+  gap: 5px;
+}
+
+.phone-list :deep(.anticon) {
+  font-size: 24px;
 }
 </style>

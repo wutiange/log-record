@@ -32,10 +32,12 @@ class ServerClient {
   }
 
   connect(model: string, id: string, isAgree: boolean) {
-    this.clientIds[`${model}-${id}`]?.end({
-      code: isAgree ? 0 : 2,
-      message: isAgree ? 'ok' : 'Access denied',
-    });
+    this.clientIds[`${model}-${id}`]?.end(
+      JSON.stringify({
+        code: isAgree ? 0 : 2,
+        message: isAgree ? 'ok' : 'Access denied',
+      }),
+    );
   }
 
   startListen(
@@ -52,12 +54,13 @@ class ServerClient {
 
     this.app.post(JOIN_PATH, (req, res) => {
       const { model, token, id } = req.body;
+      res.setHeader('Content-Type', 'application/json');
       console.log(model, token, id);
       if (this.token === token) {
         this.handlePhone(model, id);
         this.clientIds[`${model}-${id}`] = res;
       } else {
-        res.end({ code: 1, message: 'Token error' });
+        res.end(JSON.stringify({ code: 1, message: 'Token error' }));
       }
     });
 

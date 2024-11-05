@@ -14,8 +14,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   openUrl: (url: string) => ipcRenderer.send('openUrl', url),
   checkIsUpdate: () => ipcRenderer.invoke('checkIsUpdate'),
   toggleDevTools: () => ipcRenderer.invoke('toggleDevTools'),
-  connectPhone: (service: string) => {
-    ipcRenderer.send('connect-phone', service);
+  connectPhone: (model: string, id: string, isAgree: boolean) => {
+    ipcRenderer.send('connect-phone', model, id, isAgree);
   },
   startScanPhone: () => ipcRenderer.invoke('startScanPhone'),
 });

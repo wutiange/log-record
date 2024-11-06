@@ -71,7 +71,9 @@ const useLogStore = defineStore('log', () => {
 
   const handleKeyValues = async (msg: Record<string, any>): Promise<void> => {
     const fields = Object.entries(msg)
-      .filter((e) => typeof e[1] !== 'object' && e[0] !== 'id')
+      .filter(
+        (e) => typeof e[1] !== 'object' && !['id', 'createTime'].includes(e[0]),
+      )
       .map((e) => e[0]);
 
     const updatePromises = fields.map((field) =>

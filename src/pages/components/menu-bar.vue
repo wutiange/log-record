@@ -5,7 +5,8 @@ import { CheckCircleOutlined, SettingOutlined } from '@ant-design/icons-vue';
 import { version } from '../../../package.json';
 import useAppStore from '@/stores/app';
 import { useI18n } from 'vue-i18n';
-import { Service } from 'bonjour-service';
+
+
 const router = useRouter();
 const appStore = useAppStore();
 const openUpdate = ref(false);
@@ -36,6 +37,7 @@ window.electronAPI.onScanPhone((model, id) => {
   if (
     phones.value.find((item) => `${item.model}-${item.id}` === `${model}-${id}`)
   ) {
+    onConnect(model, id)
     return;
   }
   phones.value.push({ model, id, isConnect: false });

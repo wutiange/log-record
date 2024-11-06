@@ -304,6 +304,7 @@ onUnmounted(() => {
   flex-direction: row;
   gap: 10px;
   overflow: auto;
+  flex-wrap: wrap;
 }
 
 .tag-text {

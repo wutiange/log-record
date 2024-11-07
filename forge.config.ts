@@ -4,18 +4,24 @@ import { MakerZIP } from '@electron-forge/maker-zip';
 import { MakerDeb } from '@electron-forge/maker-deb';
 import { MakerRpm } from '@electron-forge/maker-rpm';
 import { VitePlugin } from '@electron-forge/plugin-vite';
+import { MakerDMG } from '@electron-forge/maker-dmg';
 
 const config: ForgeConfig = {
   packagerConfig: {
     name: '日志系统',
-    icon: './images/icon'
+    icon: './images/icon',
+    asar: true,
   },
   rebuildConfig: {},
   makers: [
-    new MakerSquirrel({}), 
-    new MakerZIP({}, ['darwin']), 
-    new MakerRpm({}), 
-    new MakerDeb({})
+    new MakerSquirrel({}),
+    new MakerZIP({}, ['darwin']),
+    new MakerDMG({
+      appPath: '.',
+      format: 'ULFO', // Universal macOS Binary
+    }),
+    new MakerRpm({}),
+    new MakerDeb({}),
   ],
   plugins: [
     new VitePlugin({
@@ -46,13 +52,13 @@ const config: ForgeConfig = {
       config: {
         repository: {
           owner: 'wutiange',
-          name: 'log-record'
+          name: 'log-record',
         },
         prerelease: false,
-        draft: true
-      }
-    }
-  ]
+        draft: true,
+      },
+    },
+  ],
 };
 
 export default config;

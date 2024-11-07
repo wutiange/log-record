@@ -13,17 +13,26 @@ class ServerClient {
   > | null = null;
   private token = `${Date.now().toString(16)}-${Math.random().toString(16)}`;
   private clientIds: Record<string, Response> = {};
+  private bonjour = new Bonjour();
 
   constructor() {
     this.app = express();
-    const bonjour = new Bonjour();
     this.app.use(express.json({ limit: '50mb' }));
-    bonjour.publish({
+  }
+
+  publish() {
+    this.bonjour.publish({
       name: `Log Record Server`,
       type: 'http',
       port: httpPort,
       protocol: 'tcp',
       txt: { path: JOIN_PATH, token: this.token },
+    });
+  }
+
+  unpublish() {
+    this.bonjour.unpublishAll(() => {
+      console.log('bonjour unpublish');
     });
   }
 
@@ -64,6 +73,7 @@ class ServerClient {
     });
 
     this.runningServer = this.app.listen(httpPort);
+    this.publish();
   }
 
   stopListen() {

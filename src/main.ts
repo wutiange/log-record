@@ -94,13 +94,14 @@ const createWindow = () => {
 
 app.whenReady().then(createWindow);
 
-app.on('window-all-closed', () => {
-  serverClient.stopListen();
-  app.quit();
-});
-
 app.on('activate', () => {
   if (BrowserWindow.getAllWindows().length === 0) {
     createWindow();
   }
+});
+
+app.on('will-quit', () => {
+  serverClient.unpublish();
+  serverClient.stopListen();
+  app.exit(0);
 });

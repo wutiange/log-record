@@ -22,7 +22,7 @@ class ServerClient {
 
   publish() {
     this.bonjour.publish({
-      name: `Log Record Server`,
+      name: `Log Record Server$$${this.token}`,
       type: 'http',
       port: httpPort,
       protocol: 'tcp',

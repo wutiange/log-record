@@ -76,13 +76,16 @@ const createWindow = () => {
       path.join(__dirname, `../renderer/${MAIN_WINDOW_VITE_NAME}/index.html`),
     );
   }
-  serverClient.startListen({
-    '/log': (msg) => {
-      mainWindow.webContents.send('log:msg', msg);
-    },
-    '/network': (msg) => {
-      mainWindow.webContents.send('network:msg', msg);
-    },
+
+  mainWindow.on('ready-to-show', () => {
+    serverClient.startListen({
+      '/log': (msg) => {
+        mainWindow.webContents.send('log:msg', msg);
+      },
+      '/network': (msg) => {
+        mainWindow.webContents.send('network:msg', msg);
+      },
+    });
   });
 
   const menu = new Menu();

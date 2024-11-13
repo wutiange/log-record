@@ -48,4 +48,5 @@ export default {
     'Detect a nearby cell phone that can be connected, click Establish Connection',
   连接: 'Connect',
   拒绝: 'Decline',
+  取消: 'Cancel',
 };

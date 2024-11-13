@@ -13,6 +13,8 @@ import { checkForUpgrade } from './utils/update';
 import { name, author, version } from '../package.json';
 import { getIPAddress } from './utils/node-strings';
 
+if (require('electron-squirrel-startup')) app.quit();
+
 const createWindow = () => {
   // Create the browser window.
   const mainWindow = new BrowserWindow({

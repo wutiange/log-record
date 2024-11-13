@@ -1,27 +1,33 @@
-import express, { Express, Response } from 'express';
-import type { IncomingMessage, ServerResponse, Server } from 'http';
+import polka, { Polka } from 'polka';
+import { json } from 'body-parser';
+import type { ServerResponse } from 'http';
 import { httpPort } from './config';
-import { Bonjour } from 'bonjour-service';
 
 const JOIN_PATH = '/join';
+
 class ServerClient {
-  private app: Express | null = null;
+  private app: Polka | null = null;
   private handlePhone: (model: string, id: string) => void;
-  private runningServer: Server<
-    typeof IncomingMessage,
-    typeof ServerResponse
-  > | null = null;
   private token = `${Date.now().toString(16)}-${Math.random().toString(16)}`;
-  private clientIds: Record<string, Response> = {};
-  private bonjour = new Bonjour();
+  private clientIds: Record<string, ServerResponse> = {};
+  private bonjour: any = null;
 
   constructor() {
-    this.app = express();
-    this.app.use(express.json({ limit: '50mb' }));
+    this.app = polka();
+    this.app.use(json({ limit: '50mb' }));
   }
 
-  publish() {
-    this.bonjour.publish({
+  private async getBonjourInstance() {
+    if (!this.bonjour) {
+      const { Bonjour } = await import('bonjour-service');
+      this.bonjour = new Bonjour();
+    }
+    return this.bonjour;
+  }
+
+  async publish() {
+    const bonjour = await this.getBonjourInstance();
+    bonjour.publish({
       name: `Log Record Server$$${this.token}`,
       type: 'http',
       port: httpPort,
@@ -31,7 +37,7 @@ class ServerClient {
   }
 
   unpublish() {
-    this.bonjour.unpublishAll(() => {
+    this.bonjour?.unpublishAll(() => {
       console.log('bonjour unpublish');
     });
   }
@@ -54,8 +60,9 @@ class ServerClient {
   ) {
     this.stopListen();
     let id = 0;
+
     Object.entries(pathHandle).forEach(([path, handle]) => {
-      this.app.post(path, function (req, res) {
+      this.app.post(path, (req, res) => {
         handle({ id: ++id, ...req.body });
         res.end(id.toString());
       });
@@ -72,15 +79,17 @@ class ServerClient {
       }
     });
 
-    this.runningServer = this.app.listen(httpPort);
+    this.app.listen(httpPort);
     this.publish();
   }
 
   stopListen() {
-    // 当服务还在运行的时候，在关闭对话框的过程中需要把服务也关闭
-    if (this.runningServer?.listening) {
-      this.runningServer.close();
-    }
+    this.app.server?.close((err) => {
+      if (!err) {
+        return;
+      }
+      console.warn(err, '-----服务关闭失败');
+    });
   }
 }
 

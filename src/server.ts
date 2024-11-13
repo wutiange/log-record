@@ -31,6 +31,7 @@ class ServerClient {
       name: `Log Record Server$$${this.token}`,
       type: 'http',
       port: httpPort,
+      host: 'log-record.local',
       protocol: 'tcp',
       txt: { path: JOIN_PATH, token: this.token },
     });

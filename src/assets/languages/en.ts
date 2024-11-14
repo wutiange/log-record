@@ -14,7 +14,7 @@ export default {
   日志系统: 'Log Record',
   日志: 'Log',
   网络: 'Network',
-  '调试器（Alt + Shift + F12）': 'Debugger (Alt + Shift + F12)',
+  调试器: 'Debugger',
   检查更新: 'Check for updates',
   '版本号：v{version}': 'Version: v{version}',
   更新内容: 'Update Content',

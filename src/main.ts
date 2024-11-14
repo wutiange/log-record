@@ -1,12 +1,4 @@
-import {
-  app,
-  BrowserWindow,
-  Menu,
-  MenuItem,
-  ipcMain,
-  shell,
-  nativeTheme,
-} from 'electron';
+import { app, BrowserWindow, ipcMain, shell, nativeTheme } from 'electron';
 import path from 'path';
 import serverClient from './server';
 import { checkForUpgrade } from './utils/update';
@@ -89,12 +81,6 @@ const createWindow = () => {
       },
     });
   });
-
-  const menu = new Menu();
-  menu.append(
-    new MenuItem({ role: 'toggleDevTools', accelerator: 'Alt+Shift+F12' }),
-  );
-  mainWindow.setMenu(menu);
 };
 
 app.whenReady().then(createWindow);

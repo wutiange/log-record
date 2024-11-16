@@ -1,4 +1,11 @@
-import { app, BrowserWindow, ipcMain, shell, nativeTheme } from 'electron';
+import {
+  app,
+  BrowserWindow,
+  ipcMain,
+  shell,
+  nativeTheme,
+  Menu,
+} from 'electron';
 import path from 'path';
 import serverClient from './server';
 import { checkForUpgrade } from './utils/update';
@@ -81,6 +88,8 @@ const createWindow = () => {
       },
     });
   });
+
+  Menu.setApplicationMenu(null);
 };
 
 app.whenReady().then(createWindow);

@@ -1,5 +1,5 @@
+// eslint-disable-next-line import/no-unresolved
 import { UpgradeCheckResult } from '@/utils/update';
-import { Service } from 'bonjour-service';
 
 declare global {
   interface Window {
@@ -10,11 +10,14 @@ declare global {
       onGetNetworkMsg: (
         msgCallback: (msg: Record<string, any>) => void,
       ) => void;
-      onScanPhone: (msgCallback: (model: string, id: string) => void) => void;
+      onScanPhone: (
+        msgCallback: (model: string, clientIP: string) => void,
+      ) => void;
       checkIsUpdate: () => Promise<UpgradeCheckResult>;
       toggleDevTools: () => Promise<void>;
       openUrl: (url: string) => void;
-      connectPhone: (model: string, id: string, isAgree: boolean) => void;
+      connectPhone: (clientIP: string, isAgree: boolean) => void;
+      pausePhone: (clientIP: string, isPlay: boolean) => void;
       startScanPhone: () => void;
     };
   }

@@ -49,4 +49,6 @@ export default {
   连接: 'Connect',
   拒绝: 'Decline',
   取消: 'Cancel',
+  '请保证调试的手机和 {ip} 处于同一个局域网':
+    'Please ensure the debugging phone and {ip} are on the same local network',
 };

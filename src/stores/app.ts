@@ -1,11 +1,12 @@
+// eslint-disable-next-line import/no-unresolved
 import { UpgradeCheckResult } from '@/utils/update';
 import { defineStore } from 'pinia';
 import { ref, watch } from 'vue';
 
 type ConnectedPhone = {
-  model: string;
-  id: string;
-  isConnect: boolean;
+  model?: string;
+  clientIP: string;
+  connectStatus: 'play' | 'pause' | 'Not Connected';
 };
 
 const CONNECTED_PHONES_KEY = 'Log Record$$connectedPhones';
@@ -13,16 +14,16 @@ const useAppStore = defineStore('app', () => {
   const updateResult = ref<Partial<UpgradeCheckResult>>({});
   const checkUpdateErrMsg = ref('');
   const connectedPhones = ref<ConnectedPhone[]>([]);
-
   // 取出本地存储的已连接的设备
   const localConnectedPhones = localStorage.getItem(CONNECTED_PHONES_KEY);
+  console.log('localConnectedPhones', localConnectedPhones);
   if (localConnectedPhones) {
-    // 每次重新加载， isConnect 状态为 false
+    // 每次重新加载， connectStatus 状态为 Not Connected
     const connectedPhonesArr = JSON.parse(
       localConnectedPhones,
     ) as ConnectedPhone[];
     connectedPhonesArr.forEach((item) => {
-      item.isConnect = false;
+      item.connectStatus = 'Not Connected';
     });
     connectedPhones.value = JSON.parse(localConnectedPhones);
   }
@@ -38,36 +39,34 @@ const useAppStore = defineStore('app', () => {
     }
   };
 
-  const updateConnectedPhones = (
-    model: string,
-    id: string,
-    isConnect: boolean,
-  ) => {
-    const key = `${model}-${id}`;
+  const updateConnectedPhones = ({
+    model,
+    clientIP,
+    connectStatus,
+  }: ConnectedPhone) => {
     const index = connectedPhones.value.findIndex(
-      (item) => `${item.model}-${item.id}` === key,
+      (item) => `${item.clientIP}` === clientIP,
     );
 
     if (index !== -1) {
       // 创建新数组以确保响应式更新
       connectedPhones.value = connectedPhones.value.map((item, i) => {
         if (i === index) {
-          return { ...item, isConnect };
+          return { ...item, connectStatus };
         }
         return item;
       });
     } else {
       connectedPhones.value = [
         ...connectedPhones.value,
-        { model, id, isConnect },
+        { model, clientIP, connectStatus },
       ];
     }
   };
 
-  const deleteConnectedPhones = (model: string, id: string) => {
-    const key = `${model}-${id}`;
+  const deleteConnectedPhones = (clientIP: string) => {
     connectedPhones.value = connectedPhones.value.filter(
-      (item) => `${item.model}-${item.id}` !== key,
+      (item) => `${item.clientIP}` !== clientIP,
     );
   };
 

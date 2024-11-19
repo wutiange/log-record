@@ -10,12 +10,17 @@ contextBridge.exposeInMainWorld('electronAPI', {
   onGetNetworkMsg: (callback: any) =>
     ipcRenderer.on('network:msg', (_event, value) => callback(value)),
   onScanPhone: (callback: any) =>
-    ipcRenderer.on('service:msg', (_event, model, id) => callback(model, id)),
+    ipcRenderer.on('service:msg', (_event, model, clientIP) =>
+      callback(model, clientIP),
+    ),
   openUrl: (url: string) => ipcRenderer.send('openUrl', url),
   checkIsUpdate: () => ipcRenderer.invoke('checkIsUpdate'),
   toggleDevTools: () => ipcRenderer.invoke('toggleDevTools'),
-  connectPhone: (model: string, id: string, isAgree: boolean) => {
-    ipcRenderer.send('connect-phone', model, id, isAgree);
+  connectPhone: (clientIP: string, isAgree: boolean) => {
+    ipcRenderer.send('connect-phone', clientIP, isAgree);
+  },
+  pausePhone: (clientIP: string, isPlay: boolean) => {
+    ipcRenderer.send('pause-log', clientIP, isPlay);
   },
   startScanPhone: () => ipcRenderer.invoke('startScanPhone'),
 });

@@ -44,8 +44,11 @@ const createWindow = () => {
   }
 
   // 处理渲染进程发送的数据
-  ipcMain.on('connect-phone', (_, model, id, isAgree) => {
-    serverClient.connect(model, id, isAgree);
+  ipcMain.on('connect-phone', (_, clientIP, isAgree) => {
+    serverClient.connect(clientIP, isAgree);
+  });
+  ipcMain.on('pause-log', (_, clientIP, isPlay) => {
+    serverClient.stopCallbackLog(clientIP, isPlay);
   });
 
   // 初始设置
@@ -57,8 +60,8 @@ const createWindow = () => {
   ipcMain.handle('toggleDevTools', () => mainWindow.webContents.openDevTools());
   ipcMain.handle('getIPAddress', () => getIPAddress());
   ipcMain.handle('startScanPhone', () => {
-    serverClient.scanPhone((model, id) => {
-      mainWindow.webContents.send('service:msg', model, id);
+    serverClient.scanPhone((model, clientIP) => {
+      mainWindow.webContents.send('service:msg', model, clientIP);
     });
   });
   ipcMain.handle('checkIsUpdate', () =>

@@ -7,10 +7,12 @@ const JOIN_PATH = '/join';
 
 class ServerClient {
   private app: Polka | null = null;
-  private handlePhone: (model: string, id: string) => void;
+  private handlePhone: (model: string, clientIP: string) => void;
   private token = `${Date.now().toString(16)}-${Math.random().toString(16)}`;
   private clientIds: Record<string, ServerResponse> = {};
   private bonjour: any = null;
+  // key 连接手机的 IP 地址，value 是 [手机型号，是否同意]
+  private connectedPhones: Record<string, [string, boolean]> = {};
 
   constructor() {
     this.app = polka();
@@ -43,12 +45,12 @@ class ServerClient {
     });
   }
 
-  scanPhone(handlePhone: (model: string, id: string) => void) {
+  scanPhone(handlePhone: (model: string, clientIP: string) => void) {
     this.handlePhone = handlePhone;
   }
 
-  connect(model: string, id: string, isAgree: boolean) {
-    this.clientIds[`${model}-${id}`]?.end(
+  connect(clientIP: string, isAgree: boolean) {
+    this.clientIds[clientIP]?.end(
       JSON.stringify({
         code: isAgree ? 0 : 2,
         message: isAgree ? 'ok' : 'Access denied',
@@ -64,17 +66,24 @@ class ServerClient {
 
     Object.entries(pathHandle).forEach(([path, handle]) => {
       this.app.post(path, (req, res) => {
-        handle({ id: ++id, ...req.body });
+        const clientIP =
+          req.connection.remoteAddress || req.socket.remoteAddress;
+        const isHandleLog = this.connectedPhones[clientIP]?.[1] ?? true;
+        if (isHandleLog) {
+          handle({ id: ++id, ...req.body });
+        }
         res.end(id.toString());
       });
     });
 
     this.app.post(JOIN_PATH, (req, res) => {
-      const { model, token, id } = req.body;
+      const clientIP = req.connection.remoteAddress || req.socket.remoteAddress;
+      const { model, token } = req.body;
       res.setHeader('Content-Type', 'application/json');
       if (this.token === token) {
-        this.handlePhone(model, id);
-        this.clientIds[`${model}-${id}`] = res;
+        this.handlePhone(model, clientIP);
+        this.clientIds[clientIP] = res;
+        this.connectedPhones[clientIP] = [model, true];
       } else {
         res.end(JSON.stringify({ code: 1, message: 'Token error' }));
       }
@@ -82,6 +91,14 @@ class ServerClient {
 
     this.app.listen(httpPort);
     this.publish();
+  }
+
+  stopCallbackLog(clientIP: string, isPlay: boolean) {
+    const connectedPhone = this.connectedPhones[clientIP];
+    if (!connectedPhone) {
+      return;
+    }
+    this.connectedPhones[clientIP][1] = isPlay;
   }
 
   stopListen() {

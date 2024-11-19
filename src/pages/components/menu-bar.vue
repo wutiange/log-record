@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, reactive, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
-import { CheckCircleOutlined, SettingOutlined } from '@ant-design/icons-vue';
+import { CheckCircleOutlined, PauseCircleFilled, PlayCircleFilled, SettingOutlined } from '@ant-design/icons-vue';
 import { version } from '../../../package.json';
 import useAppStore from '@/stores/app';
 import { useI18n } from 'vue-i18n';
@@ -13,14 +13,14 @@ const isShowConnect = ref(false);
 const i18n = useI18n();
 const ip = ref('');
 const funcs = reactive([
-  // @ts-ignore
   {
+    // @ts-ignore
     img: new URL('../../assets/images/log.svg', import.meta.url).href,
     path: '/log',
     text: i18n.t('日志'),
   },
-  // @ts-ignore
   {
+    // @ts-ignore
     img: new URL('../../assets/images/network.svg', import.meta.url).href,
     path: '/network',
     text: i18n.t('网络'),
@@ -31,16 +31,16 @@ const selectedObj = reactive<Record<string, boolean>>({
   '/network': false,
 });
 
-window.electronAPI.onScanPhone((model, id) => {
+window.electronAPI.onScanPhone((model, clientIP) => {
   if (
     appStore.connectedPhones.find(
-      (item) => `${item.model}-${item.id}` === `${model}-${id}`,
+      (item) => item.clientIP === clientIP,
     )
   ) {
-    onConnect(model, id);
+    onConnect(clientIP);
     return;
   }
-  appStore.updateConnectedPhones(model, id, false);
+  appStore.updateConnectedPhones({ model, clientIP, connectStatus: 'Not Connected' });
 });
 
 onMounted(async () => {
@@ -102,14 +102,21 @@ const onConnectIns = () => {
   isShowConnect.value = true;
 };
 
-const onReject = (model: string, id: string) => {
-  appStore.deleteConnectedPhones(model, id);
-  window.electronAPI.connectPhone(model, id, false);
+const onReject = (clientIP: string) => {
+  appStore.deleteConnectedPhones(clientIP);
+  window.electronAPI.connectPhone(clientIP, false);
 };
 
-const onConnect = (model: string, id: string) => {
-  appStore.updateConnectedPhones(model, id, true);
-  window.electronAPI.connectPhone(model, id, true);
+const onConnect = (clientIP: string) => {
+  appStore.updateConnectedPhones({ clientIP, connectStatus: 'play' });
+  window.electronAPI.connectPhone(clientIP, true);
+};
+
+const onPauseOrPlay = (clientIP: string) => {
+  const currentPhone = appStore.connectedPhones.find(e => e.clientIP === clientIP)
+  const isPlay = currentPhone.connectStatus === 'play'
+  appStore.updateConnectedPhones({ clientIP, connectStatus: isPlay ? 'pause' : 'play' });
+  window.electronAPI.pausePhone(clientIP, !isPlay);
 };
 </script>
 
@@ -176,18 +183,26 @@ const onConnect = (model: string, id: string) => {
         : $t('连接说明')
         " @ok="isShowConnect = false" :footer="null">
         <div v-if="appStore.connectedPhones.length > 0" class="bonjour-box">
-          <div class="phone-list" v-for="{ model, id, isConnect } in appStore.connectedPhones" :key="`${model}-${id}`">
-            <span class="model-text">{{ model }} ({{ id ?? '--' }})</span>
-            <div class="phone-op-box" v-if="!isConnect">
-              <a-button type="primary" danger ghost @click="() => onReject(model, id)">
+          <div class="phone-list" v-for="{ model, clientIP, connectStatus } in appStore.connectedPhones"
+            :key="clientIP">
+            <span class="model-text">{{ model ?? '--' }} ({{ clientIP?.replace("::ffff:", '') ?? '--' }})</span>
+            <div class="phone-op-box" v-if="connectStatus === 'Not Connected'">
+              <a-button type="primary" danger ghost @click="() => onReject(clientIP)">
                 {{ $t('拒绝') }}
               </a-button>
-              <a-button type="primary" @click="() => onConnect(model, id)">
+              <a-button type="primary" @click="() => onConnect(clientIP)">
                 {{ $t('连接') }}
               </a-button>
             </div>
-            <CheckCircleOutlined two-tone-color="#52c41a" v-else />
+            <PauseCircleFilled class="play-stop" @click="() => onPauseOrPlay(clientIP)"
+              v-else-if="connectStatus === 'play'" />
+            <PlayCircleFilled class="play-stop" @click="() => onPauseOrPlay(clientIP)"
+              v-else-if="connectStatus === 'pause'" />
           </div>
+
+          <p class="important-tip">
+            *{{ $t('请保证调试的手机和 {ip} 处于同一个局域网', { ip }) }}
+          </p>
         </div>
         <template v-else>
           <p>
@@ -308,7 +323,7 @@ p {
   background-color: var(--color-background-soft);
 
   .ant-modal-title {
-    color: red;
+    color: var(--color-text);
   }
 }
 
@@ -352,14 +367,23 @@ div {
 }
 
 .phone-list {
-  margin-top: 5px;
   display: flex;
   flex-direction: row;
   align-items: center;
   flex-wrap: wrap;
   justify-content: space-between;
-  height: 40px;
   gap: 10px;
+  padding: 10px;
+  border-radius: var(--border-radius-default);
+  border-bottom: 1px solid var(--color-border);
+
+  /* 添加过渡效果 */
+  transition: all 0.5s ease;
+}
+
+.phone-list:hover {
+  border-bottom: 1px solid var(--color-border-hover);
+  cursor: pointer;
 }
 
 .model-text {
@@ -368,6 +392,7 @@ div {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-size: 15px;
 }
 
 .phone-op-box {
@@ -377,5 +402,24 @@ div {
 
 .phone-list :deep(.anticon) {
   font-size: 24px;
+}
+
+.play-stop {
+  cursor: pointer;
+  /* 添加过渡效果 */
+  transition: all 0.5s ease;
+
+  /* 可选：设置变换原点 */
+  transform-origin: center center;
+}
+
+.play-stop:hover {
+  transform: scale(1.3);
+}
+
+.important-tip {
+  font-size: 12px;
+  margin-top: 30px;
+  color: var(--color-error) !important;
 }
 </style>

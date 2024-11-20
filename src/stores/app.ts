@@ -14,9 +14,9 @@ const useAppStore = defineStore('app', () => {
   const updateResult = ref<Partial<UpgradeCheckResult>>({});
   const checkUpdateErrMsg = ref('');
   const connectedPhones = ref<ConnectedPhone[]>([]);
+
   // 取出本地存储的已连接的设备
   const localConnectedPhones = localStorage.getItem(CONNECTED_PHONES_KEY);
-  console.log('localConnectedPhones', localConnectedPhones);
   if (localConnectedPhones) {
     // 每次重新加载， connectStatus 状态为 Not Connected
     const connectedPhonesArr = JSON.parse(

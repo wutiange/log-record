@@ -33,8 +33,8 @@ const selectedObj = reactive<Record<string, boolean>>({
 
 window.electronAPI.onScanPhone((model, clientIP) => {
   if (
-    appStore.connectedPhones.find(
-      (item) => item.clientIP === clientIP,
+    appStore.connectedPhones.some(
+      (item) => item.clientIP === clientIP && item.connectStatus === 'play',
     )
   ) {
     onConnect(clientIP);

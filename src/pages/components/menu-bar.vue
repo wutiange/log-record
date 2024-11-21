@@ -76,6 +76,10 @@ watch(
   },
 );
 
+const activePhones = computed(() => {
+  return appStore.connectedPhones.filter((item) => item.isActive);
+});
+
 const updateContent = computed(() => {
   const body = appStore.updateResult?.releaseDetails?.body ?? '';
   try {
@@ -178,13 +182,12 @@ const onPauseOrPlay = (clientIP: string) => {
     </div>
 
     <div ref="contentTip" class="tip-box">
-      <a-modal :getContainer="() => $refs.contentTip" v-model:open="isShowConnect" :title="appStore.connectedPhones.length > 0
+      <a-modal :getContainer="() => $refs.contentTip" v-model:open="isShowConnect" :title="activePhones.length > 0
         ? $t('检测到附近有可以连接的手机，点击建立连接')
         : $t('连接说明')
         " @ok="isShowConnect = false" :footer="null">
-        <div v-if="appStore.connectedPhones.length > 0" class="bonjour-box">
-          <div class="phone-list" v-for="{ model, clientIP, connectStatus } in appStore.connectedPhones"
-            :key="clientIP">
+        <div v-if="activePhones.length > 0" class="bonjour-box">
+          <div class="phone-list" v-for="{ model, clientIP, connectStatus } in activePhones" :key="clientIP">
             <span class="model-text">{{ model ?? '--' }} ({{ clientIP?.replace("::ffff:", '') ?? '--' }})</span>
             <div class="phone-op-box" v-if="connectStatus === 'Not Connected'">
               <a-button type="primary" danger ghost @click="() => onReject(clientIP)">

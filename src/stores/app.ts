@@ -7,6 +7,7 @@ type ConnectedPhone = {
   model?: string;
   clientIP: string;
   connectStatus: 'play' | 'pause' | 'Not Connected';
+  isActive?: boolean;
 };
 
 const CONNECTED_PHONES_KEY = 'Log Record$$connectedPhones';
@@ -23,9 +24,9 @@ const useAppStore = defineStore('app', () => {
       localConnectedPhones,
     ) as ConnectedPhone[];
     connectedPhonesArr.forEach((item) => {
-      item.connectStatus = 'Not Connected';
+      item.isActive = false;
     });
-    connectedPhones.value = JSON.parse(localConnectedPhones);
+    connectedPhones.value = connectedPhonesArr;
   }
 
   const updateCheck = async () => {
@@ -52,14 +53,14 @@ const useAppStore = defineStore('app', () => {
       // 创建新数组以确保响应式更新
       connectedPhones.value = connectedPhones.value.map((item, i) => {
         if (i === index) {
-          return { ...item, connectStatus };
+          return { ...item, connectStatus, isActive: true };
         }
         return item;
       });
     } else {
       connectedPhones.value = [
         ...connectedPhones.value,
-        { model, clientIP, connectStatus },
+        { model, clientIP, connectStatus, isActive: true },
       ];
     }
   };

@@ -20,7 +20,10 @@ export function findAllSubstringIndices(
   let index;
   const indices: Record<string, number> = {};
   const size = searchStr.length;
-  while ((index = indexOf(str, searchStr, startIndex, ignored)) > -1) {
+  while (
+    (index = indexOf(str, searchStr, startIndex, ignored)) > -1 &&
+    size > 0
+  ) {
     indices[index] = size;
     startIndex = index + searchStr.length; // 移动到下一个可能的匹配位置
   }

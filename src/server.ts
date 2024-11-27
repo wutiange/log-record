@@ -2,6 +2,7 @@ import polka, { Polka } from 'polka';
 import { json } from 'body-parser';
 import type { ServerResponse } from 'http';
 import { httpPort } from './config';
+import { getIPAddress } from './utils/node-strings';
 
 const JOIN_PATH = '/join';
 
@@ -33,7 +34,7 @@ class ServerClient {
       name: `Log Record Server$$${this.token}`,
       type: 'http',
       port: httpPort,
-      host: 'log-record.local',
+      host: getIPAddress(),
       protocol: 'tcp',
       txt: { path: JOIN_PATH, token: this.token },
     });

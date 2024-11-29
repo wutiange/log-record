@@ -12,7 +12,8 @@ import { checkForUpgrade } from './utils/update';
 import { name, author, version } from '../package.json';
 import { getIPAddress } from './utils/node-strings';
 
-if (require('electron-squirrel-startup')) app.quit();
+if (process.platform === 'win32' && require('electron-squirrel-startup'))
+  app.quit();
 
 const createWindow = () => {
   // Create the browser window.

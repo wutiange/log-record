@@ -31,10 +31,10 @@ class ServerClient {
   async publish() {
     const bonjour = await this.getBonjourInstance();
     bonjour.publish({
-      name: `Log Record Server$$${this.token}`,
+      name: `Log_Record$$${this.token}`,
       type: 'http',
       port: httpPort,
-      host: getIPAddress(),
+      host: 'log_record.local',
       protocol: 'tcp',
       txt: { path: JOIN_PATH, token: this.token },
     });

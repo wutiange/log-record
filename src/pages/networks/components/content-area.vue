@@ -5,6 +5,9 @@ import VueJsonPretty from 'vue-json-pretty';
 import 'vue-json-pretty/lib/styles.css';
 import { message } from 'ant-design-vue';
 import { useI18n } from 'vue-i18n';
+import { NodeDataType } from 'vue-json-pretty/types/components/TreeNode';
+import get from 'lodash/get'
+
 const [messageApi, contextHolder] = message.useMessage();
 const i18n = useI18n()
 const props = defineProps(['csn']);
@@ -41,6 +44,28 @@ const copyText = async (text: any) => {
     console.error('无法复制文本: ', err);
   }
 };
+
+const onDoubleNodeClick = (root: any) => {
+  let n = 0;
+  let timer: NodeJS.Timeout | null = null
+  return (node: NodeDataType) => {
+    n += 1
+    if (n >= 2) {
+      const path = node.path.substring(1)
+      copyText(get(root, path))
+    }
+    if (timer !== null) {
+      return
+    }
+    timer = setTimeout(() => {
+      timer = null
+      n = 0
+    }, 500)
+  }
+}
+
+const onReqNodeClick = onDoubleNodeClick(reqBody.value)
+const onResNodeClick = onDoubleNodeClick(resBody.value)
 </script>
 
 <template v-if="csn.url">
@@ -74,10 +99,8 @@ const copyText = async (text: any) => {
         <div class="body-box" v-if="csn.reqBody">
           <pre v-if="typeof reqBody === 'string'" v-html="reqBody" />
           <vue-json-pretty v-else-if="csn.reqBody" :data="reqBody" :deep="2" :show-double-quotes="true" showLength
-            show-icon :collapsed-on-click-brackets="true" :key="csn.id + 'requestBody'" />
-          <span v-if="csn.reqBody" class="copy" @click="copyText(reqBody)">
-            {{ $t('复制') }}
-          </span>
+            show-icon :collapsed-on-click-brackets="false" :key="csn.id + 'requestBody'" :virtual="true"
+            class="vue-json-pretty" @node-click="onReqNodeClick" />
         </div>
         <span v-else>{{ $t('空') }}</span>
       </div>
@@ -106,11 +129,9 @@ const copyText = async (text: any) => {
           <span class="label-item">{{ $t('响应体：') }}</span>
           <div class="body-box" v-if="resBody">
             <pre v-if="typeof resBody === 'string'" v-html="resBody" />
-            <vue-json-pretty v-else-if="csn.resBody" :data="resBody" :deep="3" :show-double-quotes="true" showLength
-              show-icon :collapsed-on-click-brackets="true" :key="csn.id + 'responseBody'" />
-            <span v-if="csn.resBody" class="copy" @click="copyText(resBody)">
-              {{ $t('复制') }}
-            </span>
+            <vue-json-pretty v-else-if="csn.resBody" :data="resBody" root-path="" :deep="3" :show-double-quotes="true"
+              showLength show-icon :collapsed-on-click-brackets="false" :key="csn.id + 'responseBody'" :virtual="true"
+              class="vue-json-pretty" @node-click="onResNodeClick" />
           </div>
           <span v-else>空</span>
         </div>
@@ -211,5 +232,19 @@ const copyText = async (text: any) => {
 .req-url {
   word-wrap: break-word;
   word-break: break-all;
+}
+
+.vue-json-pretty::-webkit-scrollbar {
+  height: 5px;
+  width: 5px;
+}
+
+.vue-json-pretty::-webkit-scrollbar-thumb {
+  background-color: var(--color-scroll);
+  border-radius: var(--border-radius-default);
+}
+
+.vue-json-pretty::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-main);
 }
 </style>

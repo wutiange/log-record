@@ -1,5 +1,5 @@
 import os from 'os';
-import { exec } from 'child_process';
+import crypto from 'crypto';
 
 function getIPAddress(): string {
   const interfaces = os.networkInterfaces();
@@ -21,4 +21,22 @@ function getIPAddress(): string {
   return '0.0.0.0'; // 如果没有找到合适的IP地址，返回一个默认值
 }
 
-export { getIPAddress };
+function getSystemIdentifier() {
+  // 获取系统信息
+  const hostname = os.hostname();
+  const username = os.userInfo().username;
+
+  // 组合信息并转换为小写
+  const systemInfo = `${hostname}-${username}`.toLowerCase();
+
+  // 使用 md5 处理并截取前 8 位
+  // 8位已经有 16^8 = 4,294,967,296 种可能，足够作为本地开发使用
+  const hash = crypto
+    .createHash('md5')
+    .update(systemInfo)
+    .digest('hex')
+    .slice(0, 8);
+
+  return hash;
+}
+export { getIPAddress, getSystemIdentifier };

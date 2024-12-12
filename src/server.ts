@@ -2,7 +2,8 @@ import polka, { Polka } from 'polka';
 import { json } from 'body-parser';
 import type { ServerResponse } from 'http';
 import { httpPort } from './config';
-import { getIPAddress } from './utils/node-strings';
+import { getSystemIdentifier } from './utils/node-strings';
+import type Bonjour from 'bonjour-service';
 
 const JOIN_PATH = '/join';
 
@@ -11,7 +12,7 @@ class ServerClient {
   private handlePhone: (model: string, clientIP: string) => void;
   private token = `${Date.now().toString(16)}-${Math.random().toString(16)}`;
   private clientIds: Record<string, ServerResponse> = {};
-  private bonjour: any = null;
+  private bonjour: Bonjour = null;
   // key 连接手机的 IP 地址，value 是 [手机型号，是否同意]
   private connectedPhones: Record<string, [string, boolean]> = {};
 
@@ -25,18 +26,22 @@ class ServerClient {
       const { Bonjour } = await import('bonjour-service');
       this.bonjour = new Bonjour();
     }
+
     return this.bonjour;
   }
 
   async publish() {
     const bonjour = await this.getBonjourInstance();
-    bonjour.publish({
+    const service = bonjour.publish({
       name: `Log_Record$$${this.token}`,
       type: 'http',
       port: httpPort,
-      host: 'log_record.local',
+      host: `log-record-${getSystemIdentifier()}.local`,
       protocol: 'tcp',
       txt: { path: JOIN_PATH, token: this.token },
+    });
+    service.on('error', (err) => {
+      console.error(err, '-----服务发布失败');
     });
   }
 

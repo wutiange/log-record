@@ -91,7 +91,10 @@ const onResNodeClick = onDoubleNodeClick(resBody.value);
           class="headers-container"
           v-if="Object.keys(csn.reqHeaders ?? {}).length !== 0"
         >
-          <div class="row-container" v-for="(value, key) in csn.reqHeaders">
+          <div
+            class="row-container"
+            v-for="(value, key) in csn.reqHeaders"
+          >
             <span class="column-text">{{ key }}</span>
             <span class="column-value-text">{{ value }}</span>
           </div>
@@ -100,8 +103,14 @@ const onResNodeClick = onDoubleNodeClick(resBody.value);
       </div>
       <div class="strip">
         <span class="label-item">{{ $t('请求体：') }}</span>
-        <div class="body-box" v-if="csn.reqBody">
-          <pre v-if="typeof reqBody === 'string'" v-html="reqBody" />
+        <div
+          class="body-box"
+          v-if="csn.reqBody"
+        >
+          <pre
+            v-if="typeof reqBody === 'string'"
+            v-html="reqBody"
+          />
           <vue-json-pretty
             v-else-if="csn.reqBody"
             :data="reqBody"
@@ -119,7 +128,10 @@ const onResNodeClick = onDoubleNodeClick(resBody.value);
         <span v-else>{{ $t('空') }}</span>
       </div>
     </div>
-    <div class="content-box" v-if="typeof csn.statusCode === 'number'">
+    <div
+      class="content-box"
+      v-if="typeof csn.statusCode === 'number'"
+    >
       <template v-if="typeof csn.statusCode === 'number'">
         <div class="strip">
           <span class="label-item">{{ $t('响应时间：') }}</span>
@@ -137,7 +149,10 @@ const onResNodeClick = onDoubleNodeClick(resBody.value);
             class="headers-container"
             v-if="Object.keys(csn.resHeaders ?? {}).length !== 0"
           >
-            <div class="row-container" v-for="(value, key) in csn.resHeaders">
+            <div
+              class="row-container"
+              v-for="(value, key) in csn.resHeaders"
+            >
               <span class="column-text">{{ key }}</span>
               <span class="column-value-text">{{ value }}</span>
             </div>
@@ -146,8 +161,14 @@ const onResNodeClick = onDoubleNodeClick(resBody.value);
         </div>
         <div class="strip">
           <span class="label-item">{{ $t('响应体：') }}</span>
-          <div class="body-box" v-if="resBody">
-            <pre v-if="typeof resBody === 'string'" v-html="resBody" />
+          <div
+            class="body-box"
+            v-if="resBody"
+          >
+            <pre
+              v-if="typeof resBody === 'string'"
+              v-html="resBody"
+            />
             <vue-json-pretty
               v-else-if="csn.resBody"
               :data="resBody"

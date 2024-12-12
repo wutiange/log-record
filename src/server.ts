@@ -46,6 +46,12 @@ class ServerClient {
     });
   }
 
+  destroy() {
+    this.bonjour?.destroy(() => {
+      console.log('bonjour destroy');
+    });
+  }
+
   scanPhone(handlePhone: (model: string, clientIP: string) => void) {
     this.handlePhone = handlePhone;
   }

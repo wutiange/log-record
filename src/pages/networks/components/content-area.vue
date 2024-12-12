@@ -5,11 +5,10 @@ import VueJsonPretty from 'vue-json-pretty';
 import 'vue-json-pretty/lib/styles.css';
 import { message } from 'ant-design-vue';
 import { useI18n } from 'vue-i18n';
-import { NodeDataType } from 'vue-json-pretty/types/components/TreeNode';
-import get from 'lodash/get'
+import get from 'lodash/get';
 
 const [messageApi, contextHolder] = message.useMessage();
-const i18n = useI18n()
+const i18n = useI18n();
 const props = defineProps(['csn']);
 
 const reqBody = computed(() => {
@@ -28,8 +27,8 @@ const resBody = computed(() => {
   try {
     return JSON.parse(props.csn.resBody);
   } catch (error) {
-    console.warn('解析响应体失败', error)
-    return props.csn?.resBody ?? null
+    console.warn('解析响应体失败', error);
+    return props.csn?.resBody ?? null;
   }
 });
 
@@ -47,25 +46,25 @@ const copyText = async (text: any) => {
 
 const onDoubleNodeClick = (root: any) => {
   let n = 0;
-  let timer: NodeJS.Timeout | null = null
-  return (node: NodeDataType) => {
-    n += 1
+  let timer: NodeJS.Timeout | null = null;
+  return (node: any) => {
+    n += 1;
     if (n >= 2) {
-      const path = node.path.substring(1)
-      copyText(get(root, path))
+      const path = node.path.substring(1);
+      copyText(get(root, path));
     }
     if (timer !== null) {
-      return
+      return;
     }
     timer = setTimeout(() => {
-      timer = null
-      n = 0
-    }, 500)
-  }
-}
+      timer = null;
+      n = 0;
+    }, 500);
+  };
+};
 
-const onReqNodeClick = onDoubleNodeClick(reqBody.value)
-const onResNodeClick = onDoubleNodeClick(resBody.value)
+const onReqNodeClick = onDoubleNodeClick(reqBody.value);
+const onResNodeClick = onDoubleNodeClick(resBody.value);
 </script>
 
 <template v-if="csn.url">
@@ -82,11 +81,16 @@ const onResNodeClick = onDoubleNodeClick(resBody.value)
       </div>
       <div class="strip">
         <span class="label-item">{{ $t('请求时间：') }}</span>
-        <span>{{ dayjs(csn.createTime).format('YYYY-MM-DD HH:mm:ss') }}</span>
+        <span>
+          {{ dayjs(csn.createTime).format('YYYY-MM-DD HH:mm:ss') }}
+        </span>
       </div>
       <div class="strip">
         <span class="label-item">{{ $t('请求头：') }}</span>
-        <div class="headers-container" v-if="Object.keys(csn.reqHeaders ?? {}).length !== 0">
+        <div
+          class="headers-container"
+          v-if="Object.keys(csn.reqHeaders ?? {}).length !== 0"
+        >
           <div class="row-container" v-for="(value, key) in csn.reqHeaders">
             <span class="column-text">{{ key }}</span>
             <span class="column-value-text">{{ value }}</span>
@@ -98,9 +102,19 @@ const onResNodeClick = onDoubleNodeClick(resBody.value)
         <span class="label-item">{{ $t('请求体：') }}</span>
         <div class="body-box" v-if="csn.reqBody">
           <pre v-if="typeof reqBody === 'string'" v-html="reqBody" />
-          <vue-json-pretty v-else-if="csn.reqBody" :data="reqBody" :deep="2" :show-double-quotes="true" showLength
-            show-icon :collapsed-on-click-brackets="false" :key="csn.id + 'requestBody'" :virtual="true"
-            class="vue-json-pretty" @node-click="onReqNodeClick" />
+          <vue-json-pretty
+            v-else-if="csn.reqBody"
+            :data="reqBody"
+            :deep="2"
+            :show-double-quotes="true"
+            showLength
+            show-icon
+            :collapsed-on-click-brackets="false"
+            :key="csn.id + 'requestBody'"
+            :virtual="true"
+            class="vue-json-pretty"
+            @node-click="onReqNodeClick"
+          />
         </div>
         <span v-else>{{ $t('空') }}</span>
       </div>
@@ -109,7 +123,9 @@ const onResNodeClick = onDoubleNodeClick(resBody.value)
       <template v-if="typeof csn.statusCode === 'number'">
         <div class="strip">
           <span class="label-item">{{ $t('响应时间：') }}</span>
-          <span>{{ dayjs(csn.endTime).format('YYYY-MM-DD HH:mm:ss') }}</span>
+          <span>
+            {{ dayjs(csn.endTime).format('YYYY-MM-DD HH:mm:ss') }}
+          </span>
         </div>
         <div class="strip">
           <span class="label-item">{{ $t('响应状态：') }}</span>
@@ -117,7 +133,10 @@ const onResNodeClick = onDoubleNodeClick(resBody.value)
         </div>
         <div class="strip">
           <span class="label-item">{{ $t('响应头：') }}</span>
-          <div class="headers-container" v-if="Object.keys(csn.resHeaders ?? {}).length !== 0">
+          <div
+            class="headers-container"
+            v-if="Object.keys(csn.resHeaders ?? {}).length !== 0"
+          >
             <div class="row-container" v-for="(value, key) in csn.resHeaders">
               <span class="column-text">{{ key }}</span>
               <span class="column-value-text">{{ value }}</span>
@@ -129,9 +148,20 @@ const onResNodeClick = onDoubleNodeClick(resBody.value)
           <span class="label-item">{{ $t('响应体：') }}</span>
           <div class="body-box" v-if="resBody">
             <pre v-if="typeof resBody === 'string'" v-html="resBody" />
-            <vue-json-pretty v-else-if="csn.resBody" :data="resBody" root-path="" :deep="3" :show-double-quotes="true"
-              showLength show-icon :collapsed-on-click-brackets="false" :key="csn.id + 'responseBody'" :virtual="true"
-              class="vue-json-pretty" @node-click="onResNodeClick" />
+            <vue-json-pretty
+              v-else-if="csn.resBody"
+              :data="resBody"
+              root-path=""
+              :deep="3"
+              :show-double-quotes="true"
+              showLength
+              show-icon
+              :collapsed-on-click-brackets="false"
+              :key="csn.id + 'responseBody'"
+              :virtual="true"
+              class="vue-json-pretty"
+              @node-click="onResNodeClick"
+            />
           </div>
           <span v-else>空</span>
         </div>
@@ -161,7 +191,7 @@ const onResNodeClick = onDoubleNodeClick(resBody.value)
   flex-direction: row;
   align-items: flex-start;
   position: relative;
-  gap: 10px
+  gap: 10px;
 }
 
 .label-item {

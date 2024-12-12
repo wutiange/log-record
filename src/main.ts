@@ -106,6 +106,7 @@ app.on('activate', () => {
 
 app.on('will-quit', () => {
   serverClient.unpublish();
+  serverClient.destroy();
   serverClient.stopListen();
   app.exit(0);
 });

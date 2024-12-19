@@ -51,6 +51,7 @@ const onDoubleNodeClick = (root: any) => {
     n += 1;
     if (n >= 2) {
       const path = node.path.substring(1);
+      console.log(path, root);
       copyText(get(root, path));
     }
     if (timer !== null) {
@@ -63,8 +64,12 @@ const onDoubleNodeClick = (root: any) => {
   };
 };
 
-const onReqNodeClick = onDoubleNodeClick(reqBody.value);
-const onResNodeClick = onDoubleNodeClick(resBody.value);
+const onReqNodeClick = computed(() => {
+  return onDoubleNodeClick(reqBody.value);
+});
+const onResNodeClick = computed(() => {
+  return onDoubleNodeClick(resBody.value);
+});
 </script>
 
 <template v-if="csn.url">

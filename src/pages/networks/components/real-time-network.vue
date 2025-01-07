@@ -3,21 +3,52 @@ import SplitPane from '@/pages/components/split-pane.vue';
 import ContentArea from './content-area.vue';
 import ClearIcon from '@/assets/images/clear-icon.vue'
 import useNetworkStore from '@/stores/network';
-import { computed, h } from 'vue';
+import { ref, watch } from 'vue';
 import { filterDataNodes } from '@/utils/network';
-import { LoadingOutlined, SyncOutlined, ClockCircleOutlined } from '@ant-design/icons-vue';
-const indicator = h(LoadingOutlined, {
-  style: {
-    fontSize: '15px',
-  },
-  spin: true,
-});
+import { ClockCircleOutlined } from '@ant-design/icons-vue';
+import { TreeProps } from 'ant-design-vue';
+import { DataNode } from 'ant-design-vue/es/tree';
 
 const networkStore = useNetworkStore()
+const expandedKeys = ref<(string | number)[]>([])
+let timer: NodeJS.Timeout | null = null
+const filterTreeData = ref<DataNode[]>([])
 
-const filterTreeData = computed(() => {
-  return filterDataNodes(networkStore.treeData, networkStore.searchFilter)
+const findKey = (arr: TreeProps['treeData']) => {
+  const tempArr: (string | number)[] = []
+  arr.forEach(tree => {
+    tempArr.push(tree.key)
+    if (Array.isArray(tree.children)) {
+      tempArr.push(...findKey(tree.children))
+    }
+  })
+  return tempArr
+}
+
+watch(networkStore.treeData, () => {
+  filterTreeData.value = networkStore.treeData
 })
+
+watch(networkStore.searchFilter, () => {
+  const clean = () => {
+    if (timer === null) {
+      return
+    }
+    clearTimeout(timer)
+    timer = null
+  }
+  clean()
+  timer = setTimeout(() => {
+    if (!networkStore.searchFilter.text) {
+      return
+    }
+    filterTreeData.value = filterDataNodes(networkStore.treeData, networkStore.searchFilter)
+    expandedKeys.value = findKey(filterTreeData.value)
+    clean()
+  }, 500)
+})
+
+
 
 </script>
 
@@ -27,7 +58,8 @@ const filterTreeData = computed(() => {
       <template #left>
         <div class="content content-left">
           <div class="network-record">
-            <a-directory-tree @select="networkStore.select" class="tree-box" :tree-data="filterTreeData">
+            <a-directory-tree v-model:expandedKeys="expandedKeys" @select="networkStore.select" class="tree-box"
+              :tree-data="filterTreeData">
               <template #title="{ title, isLeaf, statusCodeKey, statusCode }">
                 <span v-if="isLeaf">
                   <a-tag v-if="statusCodeKey === 'processing'">

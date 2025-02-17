@@ -1,55 +1,59 @@
 <script setup lang="ts">
 import SplitPane from '@/pages/components/split-pane.vue';
 import ContentArea from './content-area.vue';
-import ClearIcon from '@/assets/images/clear-icon.vue'
+import ClearIcon from '@/assets/images/clear-icon.vue';
 import useNetworkStore from '@/stores/network';
-import { ref, watch } from 'vue';
+import { ref, watch, isRef } from 'vue';
 import { filterDataNodes } from '@/utils/network';
 import { ClockCircleOutlined } from '@ant-design/icons-vue';
 import { TreeProps } from 'ant-design-vue';
 import { DataNode } from 'ant-design-vue/es/tree';
 
-const networkStore = useNetworkStore()
-const expandedKeys = ref<(string | number)[]>([])
-let timer: NodeJS.Timeout | null = null
-const filterTreeData = ref<DataNode[]>([])
+const networkStore = useNetworkStore();
+const expandedKeys = ref<(string | number)[]>([]);
+let timer: NodeJS.Timeout | null = null;
+const filterTreeData = ref<DataNode[]>([]);
 
 const findKey = (arr: TreeProps['treeData']) => {
-  const tempArr: (string | number)[] = []
-  arr.forEach(tree => {
-    tempArr.push(tree.key)
+  const tempArr: (string | number)[] = [];
+  arr.forEach((tree) => {
+    tempArr.push(tree.key);
     if (Array.isArray(tree.children)) {
-      tempArr.push(...findKey(tree.children))
+      tempArr.push(...findKey(tree.children));
     }
-  })
-  return tempArr
-}
+  });
+  return tempArr;
+};
 
-watch(networkStore.treeData, () => {
-  filterTreeData.value = networkStore.treeData
-})
+watch(
+  () => networkStore.treeData,
+  () => {
+    console.log(networkStore.treeData);
+    filterTreeData.value = networkStore.treeData;
+  },
+);
 
 watch(networkStore.searchFilter, () => {
   const clean = () => {
     if (timer === null) {
-      return
+      return;
     }
-    clearTimeout(timer)
-    timer = null
-  }
-  clean()
+    clearTimeout(timer);
+    timer = null;
+  };
+  clean();
   timer = setTimeout(() => {
     if (!networkStore.searchFilter.text) {
-      return
+      return;
     }
-    filterTreeData.value = filterDataNodes(networkStore.treeData, networkStore.searchFilter)
-    expandedKeys.value = findKey(filterTreeData.value)
-    clean()
-  }, 500)
-})
-
-
-
+    filterTreeData.value = filterDataNodes(
+      networkStore.treeData,
+      networkStore.searchFilter,
+    );
+    expandedKeys.value = findKey(filterTreeData.value);
+    clean();
+  }, 500);
+});
 </script>
 
 <template>
@@ -58,8 +62,12 @@ watch(networkStore.searchFilter, () => {
       <template #left>
         <div class="content content-left">
           <div class="network-record">
-            <a-directory-tree v-model:expandedKeys="expandedKeys" @select="networkStore.select" class="tree-box"
-              :tree-data="filterTreeData">
+            <a-directory-tree
+              v-model:expandedKeys="expandedKeys"
+              @select="networkStore.select"
+              class="tree-box"
+              :tree-data="filterTreeData"
+            >
               <template #title="{ title, isLeaf, statusCodeKey, statusCode }">
                 <span v-if="isLeaf">
                   <a-tag v-if="statusCodeKey === 'processing'">
@@ -146,7 +154,7 @@ watch(networkStore.searchFilter, () => {
 .content-left {
   gap: 10px;
   padding: 15px;
-  background-color: var(--color-background)
+  background-color: var(--color-background);
 }
 
 .network-record {

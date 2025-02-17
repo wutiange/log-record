@@ -1,19 +1,20 @@
-import { SearchFilterType } from "@/types/global";
-import { addUrlToTree } from "@/utils/network";
-import { TreeProps } from "ant-design-vue";
-import { defineStore } from "pinia";
-import { ref } from "vue";
+import { SearchFilterType } from '@/types/global';
+import { addUrlToTree } from '@/utils/network';
+import { TreeProps } from 'ant-design-vue';
+import { defineStore } from 'pinia';
+import { ref } from 'vue';
 
-const useNetworkStore = defineStore("network", () => {
-  const treeData = ref<TreeProps['treeData']>([])
-  const requests = ref<Record<string, any>>({})
-  const selectedRequest = ref<Record<string, any>>({})
-  const searchFilter = ref<SearchFilterType>({text: '', isCaseSensitive: false})
-
-
+const useNetworkStore = defineStore('network', () => {
+  const treeData = ref<TreeProps['treeData']>([]);
+  const requests = ref<Record<string, any>>({});
+  const selectedRequest = ref<Record<string, any>>({});
+  const searchFilter = ref<SearchFilterType>({
+    text: '',
+    isCaseSensitive: false,
+  });
 
   const updateTreeData = (msg: any) => {
-    let id = msg.requestId
+    let id = msg.requestId;
     try {
       if (!msg.requestId) {
         requests.value[msg.id] = {
@@ -25,42 +26,52 @@ const useNetworkStore = defineStore("network", () => {
           createTime: msg.createTime,
           loading: true,
           isResponseError: msg.isResponseError ?? false,
-        }
-        id = msg.id
+        };
+        id = msg.id;
       } else if (msg.isResponseError) {
-        Object.assign(requests.value[msg.requestId], { isResponseError: true, loading: false });
+        Object.assign(requests.value[msg.requestId], {
+          isResponseError: true,
+          loading: false,
+        });
       } else if (msg.isTimeout) {
-        Object.assign(requests.value[msg.requestId], { isTimeout: true, loading: false });
+        Object.assign(requests.value[msg.requestId], {
+          isTimeout: true,
+          loading: false,
+        });
       } else if (msg.requestId) {
-        if (typeof requests.value[msg.requestId] === "object") {
+        if (typeof requests.value[msg.requestId] === 'object') {
           Object.assign(requests.value[msg.requestId], {
             resHeaders: msg.headers,
             resBody: msg.body,
             statusCode: msg.statusCode,
             endTime: msg.endTime,
-            loading: false
+            loading: false,
           });
         }
       } else {
-        return
+        return;
       }
-      const {statusCode, loading, url} = requests.value[id] ?? {}
-      treeData.value = addUrlToTree(treeData.value, {statusCode, loading, id, url})
+      const { statusCode, loading, url } = requests.value[id] ?? {};
+      treeData.value = addUrlToTree(treeData.value, {
+        statusCode,
+        loading,
+        id,
+        url,
+      });
     } catch (error) {
-      console.warn("在整理网络数据的地方出现了错误", error)
+      console.warn('在整理网络数据的地方出现了错误', error);
     }
-  }
+  };
   const onClearNetwork = () => {
-    treeData.value = []
-    requests.value = {}
-  }
+    treeData.value = [];
+    requests.value = {};
+  };
   const select = (selectedKeys: string) => {
-    selectedRequest.value = requests.value[selectedKeys[0]]
-  }
+    selectedRequest.value = requests.value[selectedKeys[0]];
+  };
   const setSearchFilter = (filter: Partial<SearchFilterType>) => {
-    Object.assign(searchFilter.value, filter)
-
-  }
+    Object.assign(searchFilter.value, filter);
+  };
   return {
     updateTreeData,
     onClearNetwork,
@@ -69,7 +80,7 @@ const useNetworkStore = defineStore("network", () => {
     select,
     searchFilter,
     setSearchFilter,
-    requests
+    requests,
   };
 });
 

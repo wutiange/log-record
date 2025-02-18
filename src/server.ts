@@ -46,14 +46,20 @@ class ServerClient {
   }
 
   unpublish() {
-    this.bonjour?.unpublishAll(() => {
-      console.log('bonjour unpublish');
+    return new Promise((resolve) => {
+      this.bonjour?.unpublishAll(() => {
+        console.log('bonjour unpublish');
+        resolve(true);
+      });
     });
   }
 
   destroy() {
-    this.bonjour?.destroy(() => {
-      console.log('bonjour destroy');
+    return new Promise((resolve) => {
+      this.bonjour?.destroy(() => {
+        console.log('bonjour destroy');
+        resolve(true);
+      });
     });
   }
 
@@ -114,11 +120,15 @@ class ServerClient {
   }
 
   stopListen() {
-    this.app.server?.close((err) => {
-      if (!err) {
-        return;
-      }
-      console.warn(err, '-----服务关闭失败');
+    return new Promise((resolve) => {
+      this.app.server?.close((err) => {
+        if (!err) {
+          resolve(true);
+          return;
+        }
+        resolve(false);
+        console.warn(err, '-----服务关闭失败');
+      });
     });
   }
 }

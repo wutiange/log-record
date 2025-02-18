@@ -104,9 +104,9 @@ app.on('activate', () => {
   }
 });
 
-app.on('will-quit', () => {
-  serverClient.unpublish();
-  serverClient.destroy();
-  serverClient.stopListen();
+app.on('will-quit', async () => {
+  await serverClient.unpublish();
+  await serverClient.destroy();
+  await serverClient.stopListen();
   app.exit(0);
 });

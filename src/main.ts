@@ -89,7 +89,7 @@ const createWindow = () => {
       },
       '/network': (msg) => {
         mainWindow.webContents.send('network:msg', msg);
-      },
+      }
     });
   });
 

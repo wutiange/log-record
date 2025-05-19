@@ -8,6 +8,7 @@ import * as path from 'path';
 import { httpPort } from './config';
 import { getSystemIdentifier } from './utils/node-strings';
 import type Bonjour from 'bonjour-service';
+import { version } from '../package.json';
 
 const JOIN_PATH = '/join';
 
@@ -145,6 +146,11 @@ class ServerClient {
       } else {
         res.end(JSON.stringify({ code: 1, message: 'Token error' }));
       }
+    });
+
+    // version
+    this.app.get('/version', (req, res) => {
+      res.end(version);
     });
 
     // Create HTTP server
